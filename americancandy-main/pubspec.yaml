@@ -1,0 +1,91 @@
+name: american_sweets
+description: A new Flutter project.
+
+publish_to: "none" # Remove this line if you wish to publish to pub.dev
+
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Base
+  google_fonts: ^6.2.1
+
+  # STATE MANAGEMENT
+  mobx: ^2.3.3+2
+  flutter_mobx: ^2.2.1+1
+  readmore: ^3.0.0
+  connectivity_plus: ^6.1.3
+  shimmer: ^3.0.0
+  image_picker: ^1.1.2
+  dio: ^5.8.0+1
+  crypto: ^3.0.6
+  path_provider: ^2.1.5
+  intl: ^0.20.2
+  flutter_branch_sdk: ^8.5.0
+  http: ^1.2.2
+  flutter_stripe: ^11.5.0
+  flutter_stripe_web: ^6.0.0
+  iconsax: ^0.0.8
+  flutter_native_splash: ^2.4.4
+  get_storage: ^2.1.1
+  share_plus: ^7.0.2
+  pdf: ^3.10.8
+  printing: ^5.11.1
+
+  #firebase
+  google_sign_in: ^7.2.0
+  get: ^4.6.6
+
+  #ShopHop
+  nb_utils: ^7.0.4
+  flutter_svg: ^2.0.10+1
+  carousel_slider: ^5.0.0
+  flutter_slidable: ^3.1.1
+  url_launcher: ^6.3.0
+  percent_indicator: ^4.2.3
+  cached_network_image: ^3.4.1
+  firebase_core: ^4.2.1
+  firebase_auth: ^6.1.2
+  cloud_firestore: ^6.1.0
+  firebase_storage: ^13.0.4
+  lottie: ^3.3.2
+  file_picker: ^10.3.8
+  cloud_functions: ^6.0.5
+  app_links: ^6.0.0
+  geolocator: ^13.0.1
+  geocoding: ^3.0.0
+  country_state_city: ^0.1.6
+
+dependency_overrides:
+  intl: ^0.19.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  mobx_codegen: ^2.6.1
+  build_runner: ^2.4.12
+
+  flutter_launcher_icons:
+
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "images/sweets/ic_app_icon.png"
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - images/sweets/
+    - images/
+    - assets/sweet_data/
+  fonts:
+    - family: Calibri
+      fonts:
+        - asset: fonts/calibri-bold.ttf
+          weight: 700

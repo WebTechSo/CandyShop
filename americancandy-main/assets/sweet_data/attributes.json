@@ -1,0 +1,354 @@
+{
+  "categories": [
+    {
+      "count": 16,
+      "description": "",
+      "id": 45,
+      "isSelected": false,
+      "menu_order": 0,
+      "name": "Chocolates",
+      "parent": 0,
+      "slug": "chocolates",
+      "image": "images/sweets/chocolates.png"
+    },
+    {
+      "count": 6,
+      "description": "",
+      "id": 18,
+      "isSelected": false,
+      "menu_order": 0,
+      "name": "Sweets",
+      "parent": 16,
+      "slug": "sweets",
+      "image": "images/sweets/sweets.png"
+
+    },
+    {
+      "count": 1,
+      "description": "",
+      "id": 53,
+      "isSelected": false,
+      "menu_order": 0,
+      "name": "Snacks",
+      "parent": 0,
+      "slug": "snacks",
+      "image": "images/sweets/snacks.png"
+
+    },
+    {
+      "count": 14,
+      "description": "",
+      "id": 19,
+      "isSelected": false,
+      "menu_order": 0,
+      "name": "Candy",
+      "parent": 0,
+      "slug": "candy",
+      "image": "images/sweets/candy.png"
+
+    },
+    {
+      "count": 4,
+      "description": "",
+      "id": 21,
+      "isSelected": false,
+      "menu_order": 0,
+      "name": "Cold Drinks",
+      "parent": 45,
+      "slug": "drinks",
+      "image": "images/sweets/cold_drinks.png"
+
+    },
+    {
+      "count": 1,
+      "description": "",
+      "id": 20,
+      "isSelected": false,
+      "menu_order": 0,
+      "name": "Instant Meals ",
+      "parent": 0,
+      "slug": "meals",
+      "image": "images/sweets/instant_meals.png"
+
+    }
+  ],
+  "brand": [
+    {
+      "count": 16,
+      "description": "",
+      "id": 45,
+      "isSelected": false,
+      "menu_order": 0,
+      "name": "Kitkat",
+      "parent": 0,
+      "slug": "kitkat",
+      "image": "images/sweets/chocolates.png"
+    },
+    {
+      "count": 6,
+      "description": "",
+      "id": 18,
+      "isSelected": false,
+      "menu_order": 0,
+      "name": "Jelly Belly",
+      "parent": 16,
+      "slug": "jelly",
+      "image": "images/sweets/sweets.png"
+
+    },
+    {
+      "count": 1,
+      "description": "",
+      "id": 53,
+      "isSelected": false,
+      "menu_order": 0,
+      "name": "Doritos",
+      "parent": 0,
+      "slug": "doritos",
+      "image": "images/sweets/snacks.png"
+
+    },
+    {
+      "count": 14,
+      "description": "",
+      "id": 19,
+      "isSelected": false,
+      "menu_order": 0,
+      "name": "Pepsi",
+      "parent": 0,
+      "slug": "pepsi",
+      "image": "images/sweets/candy.png"
+
+    },
+    {
+      "count": 4,
+      "description": "",
+      "id": 21,
+      "isSelected": false,
+      "menu_order": 0,
+      "name": "Maruchan",
+      "parent": 45,
+      "slug": "maruchan",
+      "image": "images/sweets/cold_drinks.png"
+
+    },
+    {
+      "count": 1,
+      "description": "",
+      "id": 20,
+      "isSelected": false,
+      "menu_order": 0,
+      "name": "Cocacola ",
+      "parent": 0,
+      "slug": "cocacola",
+      "image": "images/sweets/instant_meals.png"
+
+    }
+  ],
+  "size": [
+    {
+      "count": 10,
+      "description": "",
+      "id": 40,
+      "menu_order": 0,
+      "name": "10GM",
+      "slug": "10gm"
+    },
+    {
+      "count": 10,
+      "description": "",
+      "id": 39,
+      "menu_order": 0,
+      "name": "20GM",
+      "slug": "20gm"
+    },
+    {
+      "count": 10,
+      "description": "",
+      "id": 38,
+      "menu_order": 0,
+      "name": "30GM",
+      "slug": "30gm"
+    },
+    {
+      "count": 10,
+      "description": "",
+      "id": 25,
+      "menu_order": 0,
+      "name": "40GM",
+      "slug": "40gm"
+    },
+    {
+      "count": 9,
+      "description": "",
+      "id": 26,
+      "menu_order": 0,
+      "name": "50GM",
+      "slug": "50gm"
+    },
+    {
+      "count": 10,
+      "description": "",
+      "id": 27,
+      "menu_order": 0,
+      "name": "50+GM",
+      "slug": "50plus_gm"
+    }
+  ],
+  "flavor": [
+    {
+      "count": 10,
+      "description": "Rich and creamy chocolate flavor",
+      "id": 50,
+      "menu_order": 0,
+      "name": "Chocolate",
+      "slug": "chocolate"
+    },
+    {
+      "count": 8,
+      "description": "Sweet and classic vanilla flavor",
+      "id": 51,
+      "menu_order": 1,
+      "name": "Vanilla",
+      "slug": "vanilla"
+    },
+    {
+      "count": 7,
+      "description": "Fresh and fruity strawberry flavor",
+      "id": 52,
+      "menu_order": 2,
+      "name": "Strawberry",
+      "slug": "strawberry"
+    },
+    {
+      "count": 6,
+      "description": "Rich cocoa with nutty hazelnut twist",
+      "id": 53,
+      "menu_order": 3,
+      "name": "Chocolate Hazelnut",
+      "slug": "chocolate-hazelnut"
+    },
+    {
+      "count": 5,
+      "description": "Smooth and nutty peanut butter flavor",
+      "id": 54,
+      "menu_order": 4,
+      "name": "Peanut Butter",
+      "slug": "peanut-butter"
+    },
+    {
+      "count": 4,
+      "description": "Refreshing minty chocolate flavor",
+      "id": 55,
+      "menu_order": 5,
+      "name": "Mint Chocolate",
+      "slug": "mint-chocolate"
+    },
+    {
+      "count": 3,
+      "description": "Rich coffee-inspired mocha flavor",
+      "id": 56,
+      "menu_order": 6,
+      "name": "Mocha",
+      "slug": "mocha"
+    }
+  ],
+  "color": [
+    {
+      "count": 16,
+      "description": "",
+      "id": 36,
+      "menu_order": 0,
+      "name": "#000000",
+      "slug": "black"
+    },
+    {
+      "count": 18,
+      "description": "",
+      "id": 22,
+      "menu_order": 0,
+      "name": "#1e73be",
+      "slug": "blue"
+    },
+    {
+      "count": 17,
+      "description": "",
+      "id": 23,
+      "menu_order": 0,
+      "name": "#58a80d",
+      "slug": "green"
+    },
+    {
+      "count": 18,
+      "description": "",
+      "id": 37,
+      "menu_order": 0,
+      "name": "#770f0f",
+      "slug": "brown"
+    },
+    {
+      "count": 18,
+      "description": "",
+      "id": 28,
+      "menu_order": 0,
+      "name": "#a8a8a8",
+      "slug": "gray"
+    },
+    {
+      "count": 17,
+      "description": "",
+      "id": 24,
+      "menu_order": 0,
+      "name": "#dd0202",
+      "slug": "red"
+    },
+    {
+      "count": 17,
+      "description": "",
+      "id": 29,
+      "menu_order": 0,
+      "name": "#eeee22",
+      "slug": "yellow"
+    },
+    {
+      "count": 16,
+      "description": "",
+      "id": 36,
+      "menu_order": 0,
+      "name": "#0C5A93",
+      "slug": "blue"
+    },
+    {
+      "count": 16,
+      "description": "",
+      "id": 36,
+      "menu_order": 0,
+      "name": "#FFFFFF",
+      "slug": "blue"
+    },
+    {
+      "count": 16,
+      "description": "",
+      "id": 36,
+      "menu_order": 0,
+      "name": "#BDBDBD",
+      "slug": "blue"
+    },
+    {
+      "count": 16,
+      "description": "",
+      "id": 36,
+      "menu_order": 0,
+      "name": "#0C3A6A",
+      "slug": "blue"
+    },
+    {
+      "count": 16,
+      "description": "",
+      "id": 36,
+      "menu_order": 0,
+      "name": "#FF220F09",
+      "slug": "blue"
+    }
+  ]
+}

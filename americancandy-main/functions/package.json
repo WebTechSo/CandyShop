@@ -1,0 +1,13 @@
+{
+  "name": "american-sweets-functions",
+  "private": true,
+  "engines": {
+    "node": "22"
+  },
+  "main": "index.js",
+  "dependencies": {
+    "firebase-admin": "^12.5.0",
+    "firebase-functions": "^5.1.1",
+    "nodemailer": "^6.9.14"
+  }
+}

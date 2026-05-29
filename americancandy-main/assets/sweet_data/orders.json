@@ -1,0 +1,68 @@
+[
+  {
+    "item": {
+      "id": 17,
+      "name": "Jelly Cubes",
+      "image": "/candy-1.jpg",
+      "price": "15"
+    },
+    "order_date": "14 apr 2020",
+    "order_status": "Pending",
+    "order_number": "59478694"
+  },
+  {
+    "item": {
+      "id": 1,
+      "name": "Gummy Bears",
+      "price": "14",
+      "image": "/candy-2.jpg"
+    },
+    "order_date": "14 apr 2020",
+    "order_status": "Delivered",
+    "order_number": "75677767"
+  },
+  {
+    "item": {
+      "id": 18,
+      "name": "Fruit Chew Drops",
+      "price": "28",
+      "image": "/candy-3.jpg"
+    },
+    "order_date": "14 apr 2020",
+    "order_status": "Delivered",
+    "order_number": "59478694"
+  },
+  {
+    "item": {
+      "id": 17,
+      "name": "Jelly Cubes",
+      "image": "/candy-4.jpg",
+      "price": "15"
+    },
+    "order_date": "14 apr 2020",
+    "order_status": "Pending",
+    "order_number": "59478694"
+  },
+  {
+    "item": {
+      "id": 1,
+      "name": "Gummy Bears",
+      "price": "14",
+      "image": "/candy-5.jpg"
+    },
+    "order_date": "14 apr 2020",
+    "order_status": "Delivered",
+    "order_number": "75677767"
+  },
+  {
+    "item": {
+      "id": 18,
+      "name": "Fruit Chew Drops",
+      "price": "28",
+      "image": "/candy-6.jpg"
+    },
+    "order_date": "14 apr 2020",
+    "order_status": "Delivered",
+    "order_number": "59478694"
+  }
+]

@@ -1,0 +1,73 @@
+[
+  {
+    "count": 16,
+    "description": "",
+    "id": 45,
+    "isSelected": false,
+    "menu_order": 0,
+    "name": "Chocolates",
+    "parent": 0,
+    "slug": "chocolates",
+    "image": "images/sweets/chocolates.png"
+  },
+  {
+    "count": 6,
+    "description": "",
+    "id": 18,
+    "isSelected": false,
+    "menu_order": 0,
+    "name": "Sweets",
+    "parent": 16,
+    "slug": "sweets",
+    "image": "images/sweets/sweets.png"
+
+  },
+  {
+    "count": 1,
+    "description": "",
+    "id": 53,
+    "isSelected": false,
+    "menu_order": 0,
+    "name": "Snacks",
+    "parent": 0,
+    "slug": "snacks",
+    "image": "images/sweets/snacks.png"
+
+  },
+  {
+    "count": 14,
+    "description": "",
+    "id": 19,
+    "isSelected": false,
+    "menu_order": 0,
+    "name": "Candy",
+    "parent": 0,
+    "slug": "candy",
+    "image": "images/sweets/candy.png"
+
+  },
+  {
+    "count": 4,
+    "description": "",
+    "id": 21,
+    "isSelected": false,
+    "menu_order": 0,
+    "name": "Cold Drinks",
+    "parent": 45,
+    "slug": "drinks",
+    "image": "images/sweets/cold_drinks.png"
+
+  },
+  {
+    "count": 1,
+    "description": "",
+    "id": 20,
+    "isSelected": false,
+    "menu_order": 0,
+    "name": "Instant Meals",
+    "parent": 0,
+    "slug": "meals",
+    "image": "images/sweets/instant_meals.png"
+
+  }
+]

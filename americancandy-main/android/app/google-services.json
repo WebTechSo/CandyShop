@@ -1,0 +1,90 @@
+{
+  "project_info": {
+    "project_number": "647987908824",
+    "project_id": "amaricancandy-c87c3",
+    "storage_bucket": "amaricancandy-c87c3.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:647987908824:android:cd75dfea77e7010ee847ad",
+        "android_client_info": {
+          "package_name": "com.sweetstop.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "647987908824-iuulk4gu73tesh4oln0qe8knojik8051.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.sweetstop.app",
+            "certificate_hash": "9e8159ae59519565e655bb86acef2a040d7e17b5"
+          }
+        },
+        {
+          "client_id": "647987908824-9qpbc7g3qth8chu3bo9n792b87nl1t2f.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDa6gG6gMhBMGYVV1BdyjRmZhodUrZdw2Y"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "647987908824-9qpbc7g3qth8chu3bo9n792b87nl1t2f.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "647987908824-jhcuq8tic380dno5fafnddg08kttreo5.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.shopHopProkit"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:647987908824:android:c2ecea3e6839a33be847ad",
+        "android_client_info": {
+          "package_name": "com.sweetstop.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "647987908824-9qpbc7g3qth8chu3bo9n792b87nl1t2f.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDa6gG6gMhBMGYVV1BdyjRmZhodUrZdw2Y"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "647987908824-9qpbc7g3qth8chu3bo9n792b87nl1t2f.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "647987908824-jhcuq8tic380dno5fafnddg08kttreo5.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.shopHopProkit"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
