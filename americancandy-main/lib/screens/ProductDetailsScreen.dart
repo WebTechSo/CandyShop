@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:american_sweets/models/AmCategory.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -31,7 +32,7 @@ class ProductDetailsScreen extends StatefulWidget {
 class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
   int _currentTab = 3;
 
-  List<Map<String, dynamic>> _categories = [];
+  List<AmCategory> _categories = [];
   List<String> _brands = [];
   String? _selectedBrand;
 
@@ -102,24 +103,13 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     try {
       final snap =
           await FirebaseFirestore.instance.collection('Categories').get();
-      final cats = snap.docs
-          .map((d) => {
-                'id': (d.data()['id'] ?? d.id)
-                        .toString()
-                        .contains(RegExp(r'^\d+$'))
-                    ? int.tryParse(d.data()['id'].toString()) ?? 0
-                    : int.tryParse(d.id) ?? 0,
-                'name': d.data()['name']?.toString() ?? '',
-              })
-          .where(
-              (m) => (m['id'] as int) != 0 && (m['name'] as String).isNotEmpty)
-          .toList();
       if (mounted) {
         setState(() {
-          _categories = cats;
-          if (!_categories.any((e) => e['id'] == _selectedCategory) &&
-              _categories.isNotEmpty) {
-            _selectedCategory = _categories.first['id'];
+          _categories = snap.docs
+              .map((doc) => AmCategory.fromQuerySnapshot(doc))
+              .toList();
+          if (_categories.isNotEmpty && !_categories.any((e) => e.id == _selectedCategory)) {
+            _selectedCategory = _categories.first.id!;
           }
         });
       }
@@ -515,10 +505,10 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                                 _DropdownField<int>(
                                     value: _selectedCategory,
                                     items: _categories
-                                        .map((e) => e['id'] as int)
+                                        .map((e) => e.id!)
                                         .toList(),
                                     itemLabels: _categories
-                                        .map((e) => e['name'] as String)
+                                        .map((e) => e.name!)
                                         .toList(),
                                     onChanged: (v) =>
                                         setState(() => _selectedCategory = v!)),

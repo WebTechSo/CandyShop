@@ -46,7 +46,11 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
   @override
   void initState() {
     super.initState();
-    _fetchCategories();
+    initialSetData();
+  }
+
+  Future<void> initialSetData() async{
+    await _fetchCategories();
     if (widget.category != null) {
       _nameCtrl.text = widget.category!.name ?? '';
       _descCtrl.text = widget.category!.description ?? '';
@@ -62,7 +66,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
       _menuOrderCtrl.text = widget.category!.menuOrder?.toString() ?? '0';
       _isSelected = widget.category!.isSelected ?? false;
       _isSlugEdited =
-          true; // Don't auto-update slug when editing existing category
+      true; // Don't auto-update slug when editing existing category
     }
   }
 
@@ -244,19 +248,34 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    List<int> parentIds = [0];
-    List<String> parentNames = ['Root'];
-    List<String?> parentImages = [null];
+    const int rootId = -999999;
+    List<int> parentIds = [];
+    List<String> parentNames = [];
+    List<String?> parentImages = [];
+
+    final addedIds = <int>{};
+
+// Add Root ONLY once
+    addedIds.add(rootId);
+    parentIds.add(rootId);
+    parentNames.add('Root');
+    parentImages.add(null);
+
     for (var c in categoryList) {
-      if (c.id != null) {
-        parentIds.add(c.id!);
-        parentNames.add(c.name ?? 'Unknown');
-        parentImages.add(c.image);
-      }
+      final id = c.id;
+
+      // Skip null IDs
+      if (id == null) continue;
+      // Skip duplicate IDs
+      if (addedIds.contains(id)) continue;
+      addedIds.add(id);
+      parentIds.add(id);
+      parentNames.add(c.name ?? 'Unknown');
+      parentImages.add(c.image);
     }
 
-    if (!parentIds.contains(_selectedParentId)) {
-      _selectedParentId = 0;
+    if (parentIds.where((e) => e == _selectedParentId).length != 1) {
+      _selectedParentId = rootId;
     }
 
     return Scaffold(

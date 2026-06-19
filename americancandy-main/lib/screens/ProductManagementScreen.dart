@@ -152,10 +152,10 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> {
                             selected: _selectedFilter == 2,
                             onTap: () => setState(() => _selectedFilter = 2)),
                         8.width,
-                        _FilterChip(
+/*                        _FilterChip(
                             label: 'Delete',
                             selected: _selectedFilter == 3,
-                            onTap: () => setState(() => _selectedFilter = 3)),
+                            onTap: () => setState(() => _selectedFilter = 3)),*/
                       ],
                     ),
                   ),
@@ -292,8 +292,8 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> {
                     matchesStatus = p.status == 'active';
                   else if (_selectedFilter == 2)
                     matchesStatus = p.status == 'hold';
-                  else if (_selectedFilter == 3)
-                    matchesStatus = p.status == 'delete';
+                  else if (_selectedFilter == 0)
+                    matchesStatus = p.status != 'delete'; //ignore deleted
 
                   return matchesPrice && matchesSearch && matchesStatus;
                 }).toList();
