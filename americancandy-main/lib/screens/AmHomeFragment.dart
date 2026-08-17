@@ -430,46 +430,6 @@ class AmHomeFragmentState extends State<AmHomeFragment> {
                         ),
                       ),
 
-                      // Filter Dropdown Section - Replaced Categories Slide Bar
-                      Container(
-                        padding: EdgeInsets.all(16),
-                        child: Column(
-                          children: [
-                            // Filter Options Row
-                            Row(
-                              children: [
-                                _buildFilterDropdown(
-                                  title: 'Price',
-                                  isExpanded: showPriceDropdown,
-                                  onTap: () => toggleDropdown('price'),
-                                  selectedValue: selectedPriceRange,
-                                ),
-                                SizedBox(width: 12),
-                                _buildFilterDropdown(
-                                  title: 'Country',
-                                  isExpanded: showCountryDropdown,
-                                  onTap: () => toggleDropdown('country'),
-                                  selectedValue: selectedCountry,
-                                ),
-                                SizedBox(width: 12),
-                                _buildFilterDropdown(
-                                  title: 'Brand',
-                                  isExpanded: showBrandDropdown,
-                                  onTap: () => toggleDropdown('brand'),
-                                  selectedValue: 'All Brands',
-                                ),
-                              ],
-                            ),
-
-                            // Dropdown Contents
-                            if (showPriceDropdown) _buildPriceDropdown(),
-                            if (showCategoryDropdown) _buildCategoryDropdown(),
-                            if (showCountryDropdown) _buildCountryDropdown(),
-                            if (showBrandDropdown) _buildBrandDropdown(),
-                          ],
-                        ),
-                      ),
-
                       // Show search results or normal content
                       if (isSearching) ...[
                         if (searchResults.isEmpty)

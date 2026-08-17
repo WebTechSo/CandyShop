@@ -83,7 +83,7 @@ class AmContactUsScreenState extends State<AmContactUsScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
-                      Text(sh_lbl_call_request, style: primaryTextStyle()),
+                      Text(sh_lbl_whatsapp_quick_chat_call, style: primaryTextStyle()),
                       Icon(Icons.keyboard_arrow_right,
                           color: appStore.isDarkModeOn
                               ? white
@@ -116,7 +116,7 @@ class AmContactUsScreenState extends State<AmContactUsScreen> {
                       )
                     ],
                   ),
-                  Text("Response within 24 business hours",
+                  Text("Response within 1 business hour",
                       style: secondaryTextStyle()),
                   SizedBox(height: spacing_standard_new),
                   divider()

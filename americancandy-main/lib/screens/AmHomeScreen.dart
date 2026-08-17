@@ -248,10 +248,9 @@ class AmHomeScreenState extends State<AmHomeScreen> {
         title: Text(title, style: boldTextStyle(size: 22)),
         centerTitle: true,
       ),
-      body: Stack(
-        alignment: Alignment.bottomLeft,
+      body: Column(
         children: [
-          fragments[selectedTab],
+         Expanded(child: fragments[selectedTab]),
           Container(
             color: context.cardColor,
             child: SafeArea(

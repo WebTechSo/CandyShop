@@ -70,8 +70,6 @@ class AmOrderSummaryScreenState extends State<AmOrderSummaryScreen> {
 
   // Bank Transfer form
   DateTime? _bankPaymentDate;
-  final TextEditingController _bankRefCtrl = TextEditingController();
-  final TextEditingController _bankSenderCtrl = TextEditingController();
   String? _bankProofUrl;
   bool _bankUploading = false;
   AmPaymentMethod? _bankAdmin;
@@ -267,8 +265,6 @@ class AmOrderSummaryScreenState extends State<AmOrderSummaryScreen> {
     _cartSubscription?.cancel();
     super.dispose();
     timer?.cancel();
-    _bankRefCtrl.dispose();
-    _bankSenderCtrl.dispose();
   }
 
   void startTimer() {
@@ -1659,24 +1655,6 @@ class AmOrderSummaryScreenState extends State<AmOrderSummaryScreen> {
                   ),
                 ),
                 12.height,
-                // Payment Reference Used
-                TextField(
-                  controller: _bankRefCtrl,
-                  decoration: InputDecoration(
-                    labelText: 'Payment Reference Used (Order ID / OCR)',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-                12.height,
-                // Sender Name
-                TextField(
-                  controller: _bankSenderCtrl,
-                  decoration: InputDecoration(
-                    labelText: 'Sender Name (Account Holder Name)',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-                12.height,
                 Row(
                   children: [
                     AppButton(
@@ -1898,22 +1876,10 @@ class AmOrderSummaryScreenState extends State<AmOrderSummaryScreen> {
                 Navigator.of(context, rootNavigator: true).pop();
                 return;
               }
-              if (_bankRefCtrl.text.trim().isEmpty) {
-                toast('Please enter Payment Reference Used');
-                Navigator.of(context, rootNavigator: true).pop();
-                return;
-              }
-              if (_bankSenderCtrl.text.trim().isEmpty) {
-                toast('Please enter Sender Name');
-                Navigator.of(context, rootNavigator: true).pop();
-                return;
-              }
               await _ensureGuestAccountIfNeeded();
               final details = {
                 'method': 'bank_transfer',
                 'payment_date': Timestamp.fromDate(_bankPaymentDate!),
-                'reference': _bankRefCtrl.text.trim(),
-                'sender_name': _bankSenderCtrl.text.trim(),
                 'proof_url': _bankProofUrl ?? '',
                 'admin_bank': {
                   'bank_name': _bankAdmin?.bankName ?? '',

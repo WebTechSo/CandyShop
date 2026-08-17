@@ -568,62 +568,6 @@ class _AddProductScreenState extends State<AddProductScreen> {
                         hint: 'Price Description....'),
                     12.height,
                     16.height,
-                    Text('Variants',
-                        style: GoogleFonts.workSans(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w800,
-                            color: sh_colorPrimary)),
-                    12.height,
-                    Row(children: [
-                      Expanded(
-                          child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                            _SubLabel('Size'),
-                            _DropdownField<String>(
-                                value: _size,
-                                items: _sizes,
-                                onChanged: (v) => setState(() => _size = v!)),
-                          ])),
-                      12.width,
-                      Expanded(
-                          child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                            _SubLabel('Flavor'),
-                            _DropdownField<String>(
-                                value: _flavor,
-                                items: _flavors,
-                                onChanged: (v) => setState(() => _flavor = v!)),
-                          ])),
-                    ]),
-                    12.height,
-                    Row(children: [
-                      Expanded(
-                          child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                            _SubLabel('Packaging'),
-                            _DropdownField<String>(
-                                value: _packaging,
-                                items: _packagings,
-                                onChanged: (v) =>
-                                    setState(() => _packaging = v!)),
-                          ])),
-                      12.width,
-                      Expanded(
-                          child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                            _SubLabel('Country'),
-                            _DropdownField<String>(
-                                value: _country,
-                                items: _countries,
-                                onChanged: (v) =>
-                                    setState(() => _country = v!)),
-                          ])),
-                    ]),
-                    16.height,
                     _buildImagesList(),
                     20.height,
                     Row(children: [

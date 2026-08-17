@@ -622,117 +622,6 @@ class AmProductDetailState extends State<AmProductDetail> {
       ),
     );
 
-    // --- Variations Section ---
-    var variationsSection = Padding(
-      padding: EdgeInsets.only(
-          left: spacing_standard_new,
-          right: spacing_standard_new,
-          top: spacing_standard_new),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text("Variations", style: boldTextStyle(size: 18))
-              .paddingBottom(spacing_standard),
-          Row(
-            children: [
-              // Size
-              Container(
-                padding: EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  borderRadius: radius(8),
-                  border: Border.all(color: sh_view_color),
-                  color: context.cardColor,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text("Size: ", style: secondaryTextStyle()),
-                    Text(product.variants?.size ?? "N/A",
-                        style: boldTextStyle(size: 14)),
-                  ],
-                ),
-              ).expand(),
-
-              16.width,
-
-              // Flavor
-              Container(
-                padding: EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  borderRadius: radius(8),
-                  border: Border.all(color: sh_view_color),
-                  color: context.cardColor,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text("Flavor: ", style: secondaryTextStyle()),
-                    Text(product.variants?.flavor ?? "N/A",
-                        style: boldTextStyle(size: 14)),
-                  ],
-                ),
-              ).expand(),
-            ],
-          ),
-          16.height,
-        ],
-      ),
-    );
-
-    // --- Packaging and Country Section ---
-    var packagingSection = Padding(
-      padding: EdgeInsets.only(
-          left: spacing_standard_new,
-          right: spacing_standard_new,
-          top: spacing_standard_new),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text("Packaging & Country", style: boldTextStyle(size: 18))
-              .paddingBottom(spacing_standard),
-          Row(
-            children: [
-              // Packaging
-              Container(
-                padding: EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  borderRadius: radius(8),
-                  border: Border.all(color: sh_view_color),
-                  color: context.cardColor,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text("Type: ", style: secondaryTextStyle()),
-                    Text(product.variants?.packaging ?? "N/A",
-                        style: boldTextStyle(size: 14)),
-                  ],
-                ),
-              ).expand(),
-              16.width,
-              // Country
-              Container(
-                padding: EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  borderRadius: radius(8),
-                  border: Border.all(color: sh_view_color),
-                  color: context.cardColor,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text("Country: ", style: secondaryTextStyle()),
-                    Text(product.variants?.country ?? "N/A",
-                        style: boldTextStyle(size: 14)),
-                  ],
-                ),
-              ).expand(),
-            ],
-          ),
-        ],
-      ),
-    );
-
     // --- Category and Brand Section ---
     var categoryAndBrandSection = Padding(
       padding: EdgeInsets.symmetric(
@@ -900,8 +789,6 @@ class AmProductDetailState extends State<AmProductDetail> {
           priceSection,
           descriptionSection,
           ingredientsSection,
-          variationsSection,
-          packagingSection,
           categoryAndBrandSection,
           mostPopularSection,
           40.height,
