@@ -225,10 +225,41 @@ class OrderService {
     });
   }
 
-  // Update Order Status
+  // Update Order Status -- if new status is cancelled then restocked
   Future<void> updateOrderStatus(String orderId, String status) async {
-    await _firestore.collection('Orders').doc(orderId).update({
-      'delivery_status': status,
+    final orderRef = _firestore.collection('Orders').doc(orderId);
+
+    await _firestore.runTransaction((tx) async {
+      final orderSnap = await tx.get(orderRef);
+      if (!orderSnap.exists) {
+        throw Exception('Order not found');
+      }
+      final currentStatus = orderSnap.data()?['delivery_status'] ?? '';
+      if (currentStatus == 'Cancelled') {
+        throw Exception('Order is already cancelled');
+      }
+      tx.update(orderRef, {'delivery_status': status});
+
+      if (status == 'Cancelled') {
+        final itemsSnap = await _firestore
+            .collection('order_items')
+            .where('order_id', isEqualTo: orderId)
+            .get();
+
+        for (final itemDoc in itemsSnap.docs) {
+          final data = itemDoc.data();
+          final String? productId = data['product_id'];
+          final int quantity = (data['quantity'] ?? 1) as int;
+
+          if (productId != null && productId.isNotEmpty) {
+            final prodRef = _firestore.collection('Products').doc(productId);
+
+            tx.update(prodRef, {
+              'available_quantity': FieldValue.increment(quantity),
+            });
+          }
+        }
+      }
     });
   }
 

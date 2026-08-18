@@ -111,9 +111,9 @@ class AmSignUpState extends State<AmSignUp> {
                               ).createShader(Rect.fromLTWH(
                                   0, 0, bounds.width, bounds.height)),
                               child: Text(
-                                "American",
+                                "AMERICAN",
                                 style: GoogleFonts.workSans(
-                                  fontSize: 35,
+                                  fontSize: 28,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.white,
                                 ),
@@ -121,9 +121,9 @@ class AmSignUpState extends State<AmSignUp> {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              "Sweets",
+                              "CONFECTIONERS LTD",
                               style: GoogleFonts.workSans(
-                                fontSize: 35,
+                                fontSize: 26,
                                 fontWeight: FontWeight.bold,
                                 color: sh_colorPrimary,
                               ),
@@ -149,12 +149,6 @@ class AmSignUpState extends State<AmSignUp> {
                                 selectedValue:
                                     controller.registrationCountryCont,
                                 countriesList: controller.variantCountries),
-                            12.height,
-                            buildInputField("Registration Number",
-                                controller: controller.registrationNumberCont),
-                            12.height,
-                            buildInputField("VAT Number",
-                                controller: controller.vatNumberCont),
                             24.height,
 
                             // -------- CONTACT DETAILS --------
@@ -236,92 +230,6 @@ class AmSignUpState extends State<AmSignUp> {
                               }
                               return null;
                             }),
-                            24.height,
-
-                            // -------- BILLING ADDRESS --------
-                            Align(
-                              alignment: Alignment.centerLeft,
-                              child: Text("BILLING ADDRESS",
-                                  style: boldTextStyle(
-                                      size: 18, color: sh_colorPrimary)),
-                            ),
-                            16.height,
-                            buildInputField("Address 1",
-                                controller: controller.billingAddress1Cont,
-                                required: true),
-                            12.height,
-                            buildInputField("Address 2",
-                                controller: controller.billingAddress2Cont),
-                            12.height,
-                            buildDropdownField(
-                                "Country",
-                                (val) =>
-                                    controller.billingCountry.value = val ?? '',
-                                selectedValue: controller.billingCountry,
-                                countriesList: controller.variantCountries),
-                            12.height,
-                            buildStateDropdownField(
-                                controller: controller,
-                                selectedCountry: controller.billingCountry,
-                                stateController: controller.billingStateCont),
-                            12.height,
-                            buildInputField("City",
-                                controller: controller.billingCityCont,
-                                required: true),
-                            12.height,
-                            buildInputField("Zip Code",
-                                controller: controller.billingZipCont),
-                            24.height,
-
-                            // -------- DELIVERY ADDRESS --------
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text("DELIVERY ADDRESS",
-                                    style: boldTextStyle(
-                                        size: 18, color: sh_colorPrimary)),
-                                Row(
-                                  children: [
-                                    Obx(() => Checkbox(
-                                          value: controller.sameAsBilling.value,
-                                          activeColor: sh_colorPrimary,
-                                          onChanged: (val) {
-                                            controller.toggleSameAsBilling(
-                                                val ?? false);
-                                          },
-                                        )),
-                                    Text("Same as Billing",
-                                        style: primaryTextStyle(size: 14)),
-                                  ],
-                                ),
-                              ],
-                            ),
-                            16.height,
-                            buildInputField("Address 1",
-                                controller: controller.deliveryAddress1Cont,
-                                required: true),
-                            12.height,
-                            buildInputField("Address 2",
-                                controller: controller.deliveryAddress2Cont),
-                            12.height,
-                            buildDropdownField(
-                                "Country",
-                                (val) => controller.deliveryCountry.value =
-                                    val ?? '',
-                                selectedValue: controller.deliveryCountry,
-                                countriesList: controller.variantCountries),
-                            12.height,
-                            buildStateDropdownField(
-                                controller: controller,
-                                selectedCountry: controller.deliveryCountry,
-                                stateController: controller.deliveryStateCont),
-                            12.height,
-                            buildInputField("City",
-                                controller: controller.deliveryCityCont,
-                                required: true),
-                            12.height,
-                            buildInputField("Zip Code",
-                                controller: controller.deliveryZipCont),
                             24.height,
 
                             // -------- TERMS & CONDITIONS --------

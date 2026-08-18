@@ -920,7 +920,7 @@ class AmOrderSummaryScreenState extends State<AmOrderSummaryScreen> {
         }
       }));
       if (!mounted) return;
-      AmOrderSuccessScreen(orderNumber: res.orderCode)
+      AmOrderSuccessScreen(orderNumber: res.orderCode,paymentMethod: currentPaymentMethod,)
           .launch(context, isNewTask: true);
     } catch (e) {
       if (mounted) Navigator.of(context, rootNavigator: true).maybePop();

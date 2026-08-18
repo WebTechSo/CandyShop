@@ -13,9 +13,10 @@ import 'AmHomeScreen.dart';
 class AmOrderSuccessScreen extends StatelessWidget {
   static String tag = '/AmOrderSuccessScreen';
   final String orderNumber;
+  final String paymentMethod;
 
   // Constructor to receive the order number
-  AmOrderSuccessScreen({required this.orderNumber});
+  AmOrderSuccessScreen({required this.orderNumber, required this.paymentMethod});
 
   @override
   Widget build(BuildContext context) {
@@ -66,12 +67,18 @@ class AmOrderSuccessScreen extends StatelessWidget {
                 style: boldTextStyle(size: 24, color: textColor),
               ),
               8.height,
-              Text(
-                'Your payment was successful, and we’ve received your order.',
-                textAlign: TextAlign.center,
-                style: primaryTextStyle(size: 16, color: textColor),
-              ),
-
+              if(paymentMethod.toLowerCase == 'bank transfer')
+                Text(
+                  'Your payment was successful, and we’ve received your order.',
+                  textAlign: TextAlign.center,
+                  style: primaryTextStyle(size: 16, color: textColor),
+                )
+              else
+                Text(
+                  'We’ve received your order.',
+                  textAlign: TextAlign.center,
+                  style: primaryTextStyle(size: 16, color: textColor),
+                ),
               16.height,
 
               // 3. Confirmation Email Text
