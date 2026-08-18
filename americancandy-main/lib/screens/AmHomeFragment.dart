@@ -15,6 +15,8 @@ import 'package:american_sweets/main.dart';
 class AmHomeFragment extends StatefulWidget {
   static String tag = '/AmHomeFragment';
 
+  const AmHomeFragment({Key? key}) : super(key: key);
+
   @override
   AmHomeFragmentState createState() => AmHomeFragmentState();
 }
@@ -390,42 +392,7 @@ class AmHomeFragmentState extends State<AmHomeFragment> {
                                 tooltip: 'Filter Products',
                               ),
                             ),
-                            SizedBox(width: 12),
-                            Container(
-                              padding: EdgeInsets.symmetric(horizontal: 8),
-                              decoration: BoxDecoration(
-                                color: context.scaffoldBackgroundColor,
-                                borderRadius: BorderRadius.circular(12),
-                                border:
-                                    Border.all(color: sh_view_color, width: 1),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color:
-                                        sh_colorPrimary.withValues(alpha: 0.1),
-                                    blurRadius: 2,
-                                    offset: Offset(0, 1),
-                                  ),
-                                ],
-                              ),
-                              child: Row(
-                                children: [
-                                  Text('VAT',
-                                      style: primaryTextStyle(),
-                                      overflow: TextOverflow.ellipsis),
-                                  Switch(
-                                    value: includeVat,
-                                    thumbColor: WidgetStateProperty.all(
-                                        sh_colorPrimary),
-                                    onChanged: (value) {
-                                      setState(() {
-                                        includeVat = value;
-                                        setValue('include_vat', includeVat);
-                                      });
-                                    },
-                                  ),
-                                ],
-                              ),
-                            ),
+
                           ],
                         ),
                       ),

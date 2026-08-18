@@ -39,9 +39,14 @@ class AmHomeScreen extends StatefulWidget {
 }
 
 class AmHomeScreenState extends State<AmHomeScreen> {
+  final GlobalKey<AmHomeFragmentState> _productsFragmentKey =
+  GlobalKey<AmHomeFragmentState>();
+
+  bool includeVat = getBoolAsync('include_vat', defaultValue: true);
+
   List<AmCategory> list = [];
   var homeFragment = AmCategoriesFragment();
-  var productsFragment = AmHomeFragment();
+  late final AmHomeFragment productsFragment;
   var cartFragment = AmCartFragment();
   var wishlistFragment = AmWishlistFragment();
   var accountScreen = AmAccountScreen();
@@ -55,6 +60,7 @@ class AmHomeScreenState extends State<AmHomeScreen> {
   @override
   void initState() {
     super.initState();
+    productsFragment = AmHomeFragment(key: _productsFragmentKey);
     fragments = [
       homeFragment,
       productsFragment,
@@ -190,6 +196,34 @@ class AmHomeScreenState extends State<AmHomeScreen> {
         iconTheme: IconThemeData(
             color: appStore.isDarkModeOn ? white : sh_textColorPrimary),
         actions: [
+
+          if (selectedTab == 1)
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text('VAT',
+                    style: primaryTextStyle(
+                        color: appStore.isDarkModeOn ? white : sh_textColorPrimary)),
+                Switch(
+                  value: includeVat,
+                  thumbColor: WidgetStateProperty.all(sh_colorPrimary),
+                  onChanged: (value) {
+                    setState(() {
+                      includeVat = value;
+                      setValue('include_vat', includeVat);
+                    });
+                    // sync into the fragment's own state + re-apply filters
+                    final fragState = _productsFragmentKey.currentState;
+                    if (fragState != null) {
+                      fragState.setState(() {
+                        fragState.includeVat = value;
+                      });
+                    }
+                  },
+                ),
+              ],
+            ),
+
           // Replaced search icon with notification icon
           Stack(
             children: [
