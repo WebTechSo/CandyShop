@@ -41,12 +41,12 @@ class AuthenticationRepository extends GetxController {
   Future<void> _sendEmailVerificationCompat(User user) async {
     final settings = _verificationActionSettings();
     try {
-      await (user as dynamic).sendEmailVerification(settings);
+      await (user as dynamic).sendEmailVerification();
       return;
     } catch (_) {}
     try {
       await (user as dynamic)
-          .sendEmailVerification(actionCodeSettings: settings);
+          .sendEmailVerification();
       return;
     } catch (_) {}
     await user.sendEmailVerification();
