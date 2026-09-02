@@ -37,11 +37,11 @@ class _AddProductScreenState extends State<AddProductScreen> {
   final _skuCtrl = TextEditingController();
   final _descCtrl = TextEditingController();
   final _ingCtrl = TextEditingController();
-  final _priceCtrl = TextEditingController(text: '0.00');
-  final _unitPriceCtrl = TextEditingController(text: '0.00');
+  final _priceCtrl = TextEditingController(text: '');
+  final _unitPriceCtrl = TextEditingController(text: '');
   final _availableQtyCtrl = TextEditingController();
   final _priceDescCtrl = TextEditingController();
-  final _vatRateCtrl = TextEditingController(text: '0');
+  final _vatRateCtrl = TextEditingController(text: '');
   List<String> _productImages = [];
   bool _uploadingImages = false;
   int _uploadDone = 0;
@@ -556,7 +556,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             _SectionLabel('VAT Rate (%)'),
-                            _CurrencyField(controller: _vatRateCtrl),
+                            _InputField(controller: _vatRateCtrl,hint: "0.00",),
                           ],
                         ),
                       ),
@@ -782,6 +782,7 @@ class _DropdownField<T> extends StatelessWidget {
     }
     return DropdownButtonFormField<T>(
       initialValue: dropdownValue,
+      isExpanded: true,
       items: List.generate(effectiveItems.length, (index) {
         return DropdownMenuItem<T>(
           value: effectiveItems[index],

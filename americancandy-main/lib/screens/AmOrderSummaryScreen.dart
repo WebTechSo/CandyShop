@@ -55,7 +55,7 @@ class AmOrderSummaryScreenState extends State<AmOrderSummaryScreen> {
   Timer? timer;
   var isLoaded = false;
   ShippingOption selectedShipping = ShippingOption.fastPaid;
-  String selectedPaymentMethod = "Stripe";
+  String selectedPaymentMethod = "Cash";
   StreamSubscription? _cartSubscription;
 
   // Pricing and VAT
@@ -142,9 +142,9 @@ class AmOrderSummaryScreenState extends State<AmOrderSummaryScreen> {
         return AmProductModel(
           id: data['product_id'],
           name: data['name'],
-          price: (data['price'] is int)
-              ? (data['price'] as int).toDouble()
-              : data['price'],
+          price: (data['price'] is num)
+              ? (data['price'] as num).toDouble()
+              : double.tryParse(data['price']?.toString() ?? '') ?? 0.0,
           vatRate: (data['vat_rate'] is num)
               ? (data['vat_rate'] as num).toDouble()
               : double.tryParse(data['vat_rate']?.toString() ?? '') ?? 0.0,
@@ -171,6 +171,9 @@ class AmOrderSummaryScreenState extends State<AmOrderSummaryScreen> {
           _calculateTotal();
         });
       }
+    }, onError: (e, st) {
+      print('CART STREAM ERROR: $e');
+      print(st);
     });
 
     // Fetch Addresses (and merge with Profile address if needed)
@@ -362,7 +365,7 @@ class AmOrderSummaryScreenState extends State<AmOrderSummaryScreen> {
         // CASE A: User is Anonymous -> Link Credential (Upgrade)
         if (user != null && user.isAnonymous) {
           final emailCred =
-              EmailAuthProvider.credential(email: email, password: password);
+          EmailAuthProvider.credential(email: email, password: password);
           final res = await user.linkWithCredential(emailCred);
           user = res.user;
         }
@@ -392,18 +395,18 @@ class AmOrderSummaryScreenState extends State<AmOrderSummaryScreen> {
           // Construct Address JSON for Firestore
           final addrJson = shippingAddr != null
               ? {
-                  'address1': shippingAddr.address ?? '',
-                  'address2': '', // Add if available
-                  'city': shippingAddr.city ?? '',
-                  'state': shippingAddr.state ?? '',
-                  'zip': shippingAddr.zip_code ?? '',
-                  'country': shippingAddr.country ?? '',
-                }
+            'address1': shippingAddr.address ?? '',
+            'address2': '', // Add if available
+            'city': shippingAddr.city ?? '',
+            'state': shippingAddr.state ?? '',
+            'zip': shippingAddr.zip_code ?? '',
+            'country': shippingAddr.country ?? '',
+          }
               : {};
 
           // Create/Update User Document
           final userRef =
-              FirebaseFirestore.instance.collection('Users').doc(uid);
+          FirebaseFirestore.instance.collection('Users').doc(uid);
           String existingRole = '';
           String existingUserType = '';
           bool existed = false;
@@ -495,7 +498,7 @@ class AmOrderSummaryScreenState extends State<AmOrderSummaryScreen> {
     pw.MemoryImage? logoImage;
     try {
       final data =
-          await rootBundle.load('images/american-confectioners-ltd.png');
+      await rootBundle.load('images/american-confectioners-ltd.png');
       logoImage = pw.MemoryImage(data.buffer.asUint8List());
     } catch (_) {}
 
@@ -576,7 +579,7 @@ class AmOrderSummaryScreenState extends State<AmOrderSummaryScreen> {
             headers: const ['#', 'Description', 'Qty', 'Rate', 'Amount'],
             data: rows,
             headerStyle:
-                pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold),
+            pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold),
             cellStyle: const pw.TextStyle(fontSize: 10),
             cellAlignment: pw.Alignment.centerLeft,
           ),
@@ -589,7 +592,7 @@ class AmOrderSummaryScreenState extends State<AmOrderSummaryScreen> {
               pw.SizedBox(height: 6),
               pw.Container(
                   padding:
-                      const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                  const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                   color: pdf.PdfColors.grey300,
                   child: pw.Text(
                       'Total Paid: £${grandTotal.toStringAsFixed(2)}',
@@ -718,8 +721,8 @@ class AmOrderSummaryScreenState extends State<AmOrderSummaryScreen> {
         : '';
 
     final subtotal = (orderTotalAmount -
-            orderShippingCost -
-            (_includeVat ? orderVatAmount : 0.0))
+        orderShippingCost -
+        (_includeVat ? orderVatAmount : 0.0))
         .clamp(0.0, double.infinity);
 
     try {
@@ -819,7 +822,7 @@ class AmOrderSummaryScreenState extends State<AmOrderSummaryScreen> {
             </div>
           ''',
           'text':
-              'Sweet Stop\\n\\nHi ${customerName.isEmpty ? 'Customer' : customerName},\\n\\nThank you for your order. Order ID: $orderCode\\nStatus: $orderStatus\\nPayment: $paymentMethod\\nShipping: $shippingMethod\\nTotal: £${orderTotalAmount.toStringAsFixed(2)}\\nInvoice: $invoiceUrl',
+          'Sweet Stop\\n\\nHi ${customerName.isEmpty ? 'Customer' : customerName},\\n\\nThank you for your order. Order ID: $orderCode\\nStatus: $orderStatus\\nPayment: $paymentMethod\\nShipping: $shippingMethod\\nTotal: £${orderTotalAmount.toStringAsFixed(2)}\\nInvoice: $invoiceUrl',
           'attachments': [
             {
               'filename': 'invoice_$orderCode.pdf',
@@ -878,7 +881,7 @@ class AmOrderSummaryScreenState extends State<AmOrderSummaryScreen> {
       final currentShippingCost = shippingCost;
       final currentVatAmount = vatAmount;
       final currentShippingMethod =
-          selectedShipping == ShippingOption.fastPaid ? "Express" : "Normal";
+      selectedShipping == ShippingOption.fastPaid ? "Express" : "Normal";
       final currentPaymentMethod = selectedPaymentMethod.trim().isEmpty
           ? (FirebaseAuth.instance.currentUser == null ? 'Guest' : 'Unknown')
           : selectedPaymentMethod.trim();
@@ -928,138 +931,11 @@ class AmOrderSummaryScreenState extends State<AmOrderSummaryScreen> {
     }
   }
 
-  /*
-  // Deprecated manual CardField implementation - replaced by native Stripe Payment Sheet
-  Future<void> _showStripeCardSheet() async {
-    await showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder: (ctx) {
-        final bool isMobileSupported = !kIsWeb &&
-            (defaultTargetPlatform == TargetPlatform.android ||
-                defaultTargetPlatform == TargetPlatform.iOS);
-        String? clientSecret;
-        CardFieldInputDetails? cardDetails;
-        bool loading = true;
-        bool isInitializing = false;
-
-        return StatefulBuilder(builder: (context, setState) {
-          Future<void> _init() async {
-            if (isInitializing) return;
-            isInitializing = true;
-            try {
-              clientSecret = await StripeServices.instance
-                  .getClientSecret(amount: totalAmount, currency: 'gbp');
-            } catch (e) {
-              toast(e.toString());
-              Navigator.pop(context);
-              return;
-            }
-            if (context.mounted) {
-              setState(() {
-                loading = false;
-              });
-            }
-          }
-
-          if ((isMobileSupported || kIsWeb) && loading) _init();
-
-          return Padding(
-            padding: EdgeInsets.only(
-              left: spacing_standard_new,
-              right: spacing_standard_new,
-              top: spacing_standard_new,
-              bottom:
-                  MediaQuery.of(context).viewInsets.bottom + spacing_standard,
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text('Add card', style: boldTextStyle(size: 18)),
-                12.height,
-                if (loading)
-                  Container(
-                    height: 100,
-                    child: Center(child: CircularProgressIndicator()),
-                  )
-                else if (isMobileSupported || kIsWeb)
-                  Container(
-                    height: 50,
-                    child: CardField(
-                      autofocus: true,
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(),
-                        labelText: 'Card Details',
-                        hintText: 'Number, MM/YY, CVC',
-                        labelStyle: secondaryTextStyle(),
-                        hintStyle: secondaryTextStyle(),
-                      ),
-                      style: TextStyle(
-                        color: sh_textColorPrimary,
-                        fontSize: 16,
-                      ),
-                      onCardChanged: (details) {
-                        setState(() {
-                          cardDetails = details;
-                        });
-                      },
-                    ),
-                  )
-                else
-                  Text(
-                    'Stripe card entry is not supported on this platform.\nPlease run on Android, iOS, or Web.',
-                    style: secondaryTextStyle(),
-                  ),
-                12.height,
-                AppButton(
-                  width: double.infinity,
-                  text:
-                      'Pay ${totalAmount.toCurrencyFormat().replaceAll('\$', '£')}',
-                  color: sh_colorPrimary,
-                  textColor: sh_white,
-                  onTap: (loading || (!isMobileSupported && !kIsWeb))
-                      ? () {
-                          if (!loading) {
-                            Navigator.pop(context);
-                            toast(
-                                'Stripe is not supported on Desktop. Use Android/iOS or Web.');
-                          }
-                        }
-                      : (clientSecret == null ||
-                              cardDetails == null ||
-                              !(cardDetails?.complete ?? false))
-                          ? null
-                          : () async {
-                              try {
-                                await Stripe.instance.confirmPayment(
-                                  paymentIntentClientSecret: clientSecret!,
-                                  data: PaymentMethodParams.card(
-                                    paymentMethodData: PaymentMethodData(),
-                                  ),
-                                );
-                                Navigator.pop(context);
-                                await _finalizeOrderGlobal();
-                              } catch (e) {
-                                toast(e.toString());
-                              }
-                            },
-                ),
-                8.height,
-              ],
-            ),
-          );
-        });
-      },
-    );
-  }
-  */
-
   // Custom Card Widget - Now uses consistent padding/margin similar to AmOrderListScreen
   Widget _buildCardBox(
       {required String title,
-      required Widget content,
-      required VoidCallback onEdit}) {
+        required Widget content,
+        required VoidCallback onEdit}) {
     return Container(
       // Use full-width padding similar to AmOrderListScreen structure
       margin: EdgeInsets.symmetric(vertical: spacing_control_half),
@@ -1088,212 +964,235 @@ class AmOrderSummaryScreenState extends State<AmOrderSummaryScreen> {
     );
   }
 
+  // NOTE: Fixed the crash here. The previous implementation wrapped this
+  // Row in an IntrinsicHeight while an inner LayoutBuilder was used to decide
+  // whether to "collapse" the row for narrow items. IntrinsicHeight forces
+  // Flutter to compute the intrinsic height of every descendant, and
+  // LayoutBuilder explicitly throws when asked for its intrinsic dimensions
+  // ("LayoutBuilder does not support returning intrinsic dimensions"). That
+  // exception was thrown during layout (not build), which crashed the whole
+  // render tree and produced a blank white screen instead of a normal error
+  // widget. The fix: derive the "collapse" decision from the already-known
+  // outer `width` (via `collapseRow`, computed once per item) instead of an
+  // inner LayoutBuilder, and use a plain Builder just for scoping.
   Widget _cartListWidget(double width) {
     return isLoaded
         ? ListView.builder(
-            scrollDirection: Axis.vertical,
-            itemCount: list.length,
-            shrinkWrap: true,
-            padding: EdgeInsets.only(bottom: spacing_standard_new),
-            physics: NeverScrollableScrollPhysics(),
-            itemBuilder: (context, index) {
-              AmProductModel product = list[index];
-              int currentQty = product.quantity ?? 1;
-              final double imgSize = min(width * 0.22, 72);
-              final bool collapseRow = width < 420;
-              final String imageSrc =
-                  (product.thumbnail != null && product.thumbnail!.isNotEmpty)
-                      ? product.thumbnail!
-                      : ((product.images != null && product.images!.isNotEmpty)
-                          ? product.images!.first
-                          : '');
+        scrollDirection: Axis.vertical,
+        itemCount: list.length,
+        shrinkWrap: true,
+        padding: EdgeInsets.only(bottom: spacing_standard_new),
+        physics: NeverScrollableScrollPhysics(),
+        itemBuilder: (context, index) {
+          AmProductModel product = list[index];
+          int currentQty = product.quantity ?? 1;
+          final double imgSize = min(width * 0.22, 72);
+          final bool collapseRow = width < 420;
+          final String imageSrc =
+          (product.thumbnail != null && product.thumbnail!.isNotEmpty)
+              ? product.thumbnail!
+              : ((product.images != null && product.images!.isNotEmpty)
+              ? product.images!.first
+              : '');
 
-              return Container(
-                padding: EdgeInsets.all(10.0),
-                color: context.cardColor,
-                child: IntrinsicHeight(
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: <Widget>[
-                      Container(
-                        width: imgSize,
-                        height: imgSize,
-                        decoration: BoxDecoration(shape: BoxShape.circle),
-                        child: ClipOval(
-                          child: imageSrc.isNotEmpty
-                              ? (imageSrc.startsWith('http')
-                                  ? CachedNetworkImage(
-                                      imageUrl: imageSrc,
-                                      fit: BoxFit.cover,
-                                      placeholder: (context, url) => Container(
-                                          color: Colors.grey[200],
-                                          child: Icon(Icons.image,
-                                              color: Colors.grey)),
-                                      errorWidget: (context, url, error) =>
-                                          Container(
-                                              color: Colors.grey[200],
-                                              child: Icon(Icons.error,
-                                                  color: Colors.red)),
-                                    )
-                                  : Image.asset(
-                                      "images/sweets/img/products" + imageSrc,
-                                      fit: BoxFit.cover,
-                                      errorBuilder: (context, error,
-                                              stackTrace) =>
-                                          Container(
-                                              color: Colors.grey[200],
-                                              child: Icon(Icons.broken_image,
-                                                  color: Colors.grey)),
-                                    ))
-                              : Container(
-                                  color: Colors.grey[200],
-                                  child: Icon(Icons.image_not_supported),
-                                ),
-                        ),
-                      ).paddingRight(spacing_standard),
-                      Expanded(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.max,
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            Text(product.name.toString(),
-                                style: boldTextStyle(size: 16)),
-                            LayoutBuilder(builder: (ctx, constraints) {
-                              final bool collapse =
-                                  collapseRow || constraints.maxWidth < 240;
-                              final attrsText = Text(
-                                "Size: ${product.variants?.size ?? "N/A"} | Flavor: ${product.variants?.flavor ?? "N/A"}",
-                                style: boldTextStyle(size: 14),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              );
+          return Container(
+            padding: EdgeInsets.all(10.0),
+            color: context.cardColor,
+            child: IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  Container(
+                    width: imgSize,
+                    height: imgSize,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: sh_view_color, width: 1),
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: imageSrc.isNotEmpty
+                          ? (imageSrc.startsWith('http')
+                          ? CachedNetworkImage(
+                        imageUrl: imageSrc,
+                        fit: BoxFit.cover,
+                        placeholder: (context, url) => Container(
+                            color: Colors.grey[200],
+                            child: Icon(Icons.image,
+                                color: Colors.grey)),
+                        errorWidget: (context, url, error) =>
+                            Container(
+                                color: Colors.grey[200],
+                                child: Icon(Icons.error,
+                                    color: Colors.red)),
+                      )
+                          : Image.asset(
+                        "images/sweets/img/products" + imageSrc,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error,
+                            stackTrace) =>
+                            Container(
+                                color: Colors.grey[200],
+                                child: Icon(Icons.broken_image,
+                                    color: Colors.grey)),
+                      ))
+                          : Container(
+                        color: Colors.grey[200],
+                        child: Icon(Icons.image_not_supported),
+                      ),
+                    ),
+                  ).paddingRight(spacing_standard),
+                  Expanded(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.max,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(product.name.toString(),
+                            style: boldTextStyle(size: 16)),
+                        Builder(builder: (ctx) {
+                          final bool collapse = collapseRow;
+                          final attrsText = Text(
+                            "Size: ${product.variants?.size ?? "N/A"} | Flavor: ${product.variants?.flavor ?? "N/A"}",
+                            style: boldTextStyle(size: 14),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          );
 
-                              final qtyStepper = ConstrainedBox(
-                                constraints:
-                                    BoxConstraints(minWidth: 72, maxWidth: 110),
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                      border: Border.all(
-                                          color: sh_view_color, width: 1),
-                                      borderRadius: radius(4)),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(Icons.remove,
-                                              color: appStore.isDarkModeOn
-                                                  ? white
-                                                  : sh_textColorPrimary,
-                                              size: 16)
-                                          .paddingAll(spacing_control_half)
-                                          .onTap(() {
-                                        _updateQuantity(
-                                            product, currentQty - 1);
-                                      }),
-                                      VerticalDivider(
-                                              width: 1,
-                                              thickness: 1,
-                                              color: sh_view_color)
-                                          .withHeight(16),
-                                      Text("$currentQty",
-                                              style:
-                                                  secondaryTextStyle(size: 14))
-                                          .paddingSymmetric(
-                                              horizontal: spacing_control),
-                                      VerticalDivider(
-                                              width: 1,
-                                              thickness: 1,
-                                              color: sh_view_color)
-                                          .withHeight(16),
-                                      Icon(Icons.add,
-                                              color: appStore.isDarkModeOn
-                                                  ? white
-                                                  : sh_textColorPrimary,
-                                              size: 16)
-                                          .paddingAll(spacing_control_half)
-                                          .onTap(() {
-                                        _updateQuantity(
-                                            product, currentQty + 1);
-                                      }),
-                                    ],
-                                  ),
-                                ),
-                              );
-
-                              final priceText = Text(
-                                product.price.toString().toCurrencyFormat(),
-                                style: boldTextStyle(
-                                    color: appStore.isDarkModeOn
-                                        ? sh_gradient_1st
-                                        : sh_colorPrimary,
-                                    size: 16),
-                              );
-                              if (collapse) {
-                                return Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    attrsText,
-                                    8.height,
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        qtyStepper,
-                                        priceText,
-                                      ],
-                                    ),
-                                  ],
-                                ).paddingTop(8);
-                              }
-
-                              return Row(
-                                children: <Widget>[
-                                  Expanded(child: attrsText),
-                                  8.width,
-                                  qtyStepper,
+                          final qtyStepper = ConstrainedBox(
+                            constraints:
+                            BoxConstraints(minWidth: 72, maxWidth: 110),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                  border: Border.all(
+                                      color: sh_view_color, width: 1),
+                                  borderRadius: radius(4)),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.remove,
+                                      color: appStore.isDarkModeOn
+                                          ? white
+                                          : sh_textColorPrimary,
+                                      size: 16)
+                                      .paddingAll(spacing_control_half)
+                                      .onTap(() {
+                                    _updateQuantity(
+                                        product, currentQty - 1);
+                                  }),
+                                  VerticalDivider(
+                                      width: 1,
+                                      thickness: 1,
+                                      color: sh_view_color)
+                                      .withHeight(16),
+                                  Text("$currentQty",
+                                      style:
+                                      secondaryTextStyle(size: 14))
+                                      .paddingSymmetric(
+                                      horizontal: spacing_control),
+                                  VerticalDivider(
+                                      width: 1,
+                                      thickness: 1,
+                                      color: sh_view_color)
+                                      .withHeight(16),
+                                  Icon(Icons.add,
+                                      color: appStore.isDarkModeOn
+                                          ? white
+                                          : sh_textColorPrimary,
+                                      size: 16)
+                                      .paddingAll(spacing_control_half)
+                                      .onTap(() {
+                                    _updateQuantity(
+                                        product, currentQty + 1);
+                                  }),
                                 ],
-                              ).paddingTop(8);
-                            })
-                          ],
-                        ),
-                      ),
-                      Visibility(
-                        visible: !collapseRow,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Text(product.price.toString().toCurrencyFormat(),
-                                style: boldTextStyle(
-                                    color: appStore.isDarkModeOn
-                                        ? sh_gradient_1st
-                                        : sh_colorPrimary,
-                                    size: 16)),
-                            8.height,
-                            Icon(Icons.delete_outline, color: sh_red, size: 24)
-                                .onTap(() async {
-                              showConfirmDialogCustom(
-                                context,
-                                onAccept: (c) {
-                                  if (product.id != null) {
-                                    CartService().removeFromCart(product.id!);
-                                  }
-                                },
-                                dialogType: DialogType.DELETE,
-                                title:
-                                    "Are you sure you want to remove this item?",
-                                positiveText: "Remove",
-                              );
-                            }),
-                          ],
-                        ),
-                      ),
-                    ],
+                              ),
+                            ),
+                          );
+
+                          final priceText = Text(
+                            (double.tryParse(
+                                product.price?.toString() ?? '') ??
+                                0.0)
+                                .toStringAsFixed(2)
+                                .toCurrencyFormat(),
+                            style: boldTextStyle(
+                                color: appStore.isDarkModeOn
+                                    ? sh_gradient_1st
+                                    : sh_colorPrimary,
+                                size: 16),
+                          );
+                          if (collapse) {
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                attrsText,
+                                8.height,
+                                Row(
+                                  mainAxisAlignment:
+                                  MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    qtyStepper,
+                                    priceText,
+                                  ],
+                                ),
+                              ],
+                            ).paddingTop(8);
+                          }
+
+                          return Row(
+                            children: <Widget>[
+                              Expanded(child: attrsText),
+                              8.width,
+                              qtyStepper,
+                            ],
+                          ).paddingTop(8);
+                        })
+                      ],
+                    ),
                   ),
-                ),
-              );
-            })
+                  Visibility(
+                    visible: !collapseRow,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                            (double.tryParse(
+                                product.price?.toString() ?? '') ??
+                                0.0)
+                                .toStringAsFixed(2)
+                                .toCurrencyFormat(),
+                            style: boldTextStyle(
+                                color: appStore.isDarkModeOn
+                                    ? sh_gradient_1st
+                                    : sh_colorPrimary,
+                                size: 16)),
+                        8.height,
+                        Icon(Icons.delete_outline, color: sh_red, size: 24)
+                            .onTap(() async {
+                          showConfirmDialogCustom(
+                            context,
+                            onAccept: (c) {
+                              if (product.id != null) {
+                                CartService().removeFromCart(product.id!);
+                              }
+                            },
+                            dialogType: DialogType.DELETE,
+                            title:
+                            "Are you sure you want to remove this item?",
+                            positiveText: "Remove",
+                          );
+                        }),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        })
         : Container();
   }
 
@@ -1302,28 +1201,28 @@ class AmOrderSummaryScreenState extends State<AmOrderSummaryScreen> {
       title: "Shipping Address",
       content: addressList.isNotEmpty
           ? Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(addressList[selectedAddressPosition].full_name.validate(),
-                    style: primaryTextStyle()),
-                Text(
-                  "${addressList[selectedAddressPosition].address.validate()}, ${addressList[selectedAddressPosition].city.validate()}",
-                  style: secondaryTextStyle(),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            )
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(addressList[selectedAddressPosition].full_name.validate(),
+              style: primaryTextStyle()),
+          Text(
+            "${addressList[selectedAddressPosition].address.validate()}, ${addressList[selectedAddressPosition].city.validate()}",
+            style: secondaryTextStyle(),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      )
           : Text("No shipping address found. Tap the edit icon to add one.",
-              style: secondaryTextStyle()),
+          style: secondaryTextStyle()),
       onEdit: () async {
         if (addressList.isNotEmpty) {
           var pos = await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (BuildContext context) =>
-                          AmAddressManagerScreen())) ??
+              context,
+              MaterialPageRoute(
+                  builder: (BuildContext context) =>
+                      AmAddressManagerScreen())) ??
               selectedAddressPosition;
           await _reloadAddresses();
           if (addressList.isNotEmpty) {
@@ -1526,29 +1425,38 @@ class AmOrderSummaryScreenState extends State<AmOrderSummaryScreen> {
 
   Widget _paymentSectionWidget() {
     return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance
-          .collection('payment_methods')
-          .snapshots()
-          .asBroadcastStream(),
+      stream: FirebaseFirestore.instance.collection('payment_methods').snapshots(),
       builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return Text('Error loading payment methods', style: secondaryTextStyle());
+        }
+
         final List<Map<String, dynamic>> methods = snapshot.hasData
             ? snapshot.data!.docs
-                .map((e) => e.data() as Map<String, dynamic>)
-                .toList()
+            .map((e) => e.data() as Map<String, dynamic>)
+            .toList()
             : [];
+
         final parsed = methods.map((m) => AmPaymentMethod.fromJson(m)).toList();
+
         final enabled = parsed.where((m) {
-          if (m.type == 'stripe') return true; // if configured, show
+          if (m.type == 'stripe') return false;
           return m.enabled == true;
         }).toList();
-        // Keep a reference to bank admin config for later save
-        final bank = parsed.firstWhere((m) => (m.type ?? '') == 'bank',
-            orElse: () => AmPaymentMethod(type: 'bank'));
-        _bankAdmin = bank;
+
+        // Derive bank admin configuration locally without updating class-level variables inside builder
+        final AmPaymentMethod? bankAdmin = parsed.firstWhere(
+              (m) => (m.type ?? '') == 'bank',
+          orElse: () => AmPaymentMethod(type: 'bank'),
+        );
 
         return Container(
-          margin: EdgeInsets.fromLTRB(spacing_standard_new,
-              spacing_control_half, spacing_standard_new, spacing_control_half),
+          margin: EdgeInsets.fromLTRB(
+            spacing_standard_new,
+            spacing_control_half,
+            spacing_standard_new,
+            spacing_control_half,
+          ),
           padding: EdgeInsets.all(spacing_standard_new),
           decoration: BoxDecoration(
             color: context.cardColor,
@@ -1562,20 +1470,23 @@ class AmOrderSummaryScreenState extends State<AmOrderSummaryScreen> {
                   .paddingBottom(spacing_standard),
               if (!snapshot.hasData)
                 Padding(
-                    padding: EdgeInsets.all(8),
-                    child: CircularProgressIndicator()),
+                  padding: EdgeInsets.all(8),
+                  child: CircularProgressIndicator(),
+                ),
               ...enabled.map((m) {
-                final label = m.type == 'stripe'
-                    ? 'Stripe'
-                    : (m.type == 'cod' ? 'Cash on Delivery' : 'Bank Transfer');
+                final label = m.type == 'cod' ? 'Cash on Delivery' : 'Bank Transfer';
                 return RadioListTile<String>(
                   title: Text(label, style: primaryTextStyle()),
                   value: label,
                   groupValue: selectedPaymentMethod,
                   onChanged: (String? value) {
-                    setState(() {
-                      selectedPaymentMethod = value!;
-                    });
+                    if (value != null) {
+                      setState(() {
+                        selectedPaymentMethod = value;
+                        // Store reference when user actually interacts, not in builder
+                        _bankAdmin = bankAdmin;
+                      });
+                    }
                   },
                   dense: true,
                   fillColor: WidgetStateProperty.all(sh_colorPrimary),
@@ -1587,37 +1498,29 @@ class AmOrderSummaryScreenState extends State<AmOrderSummaryScreen> {
                 8.height,
                 Text('Bank Details', style: boldTextStyle(size: 16)),
                 6.height,
-                if (_bankAdmin != null)
+                if (bankAdmin != null)
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      if ((_bankAdmin!.bankName ?? '').isNotEmpty)
-                        Text('Bank: ${_bankAdmin!.bankName}',
-                            style: secondaryTextStyle()),
-                      if ((_bankAdmin!.accountHolderName ?? '').isNotEmpty)
-                        Text('Account Holder: ${_bankAdmin!.accountHolderName}',
-                            style: secondaryTextStyle()),
-                      if ((_bankAdmin!.iban ?? '').isNotEmpty)
-                        Text('IBAN: ${_bankAdmin!.iban}',
-                            style: secondaryTextStyle()),
-                      if ((_bankAdmin!.bicSwift ?? '').isNotEmpty)
-                        Text('BIC/SWIFT: ${_bankAdmin!.bicSwift}',
-                            style: secondaryTextStyle()),
-                      if ((_bankAdmin!.paymentReference ?? '').isNotEmpty)
-                        Text('Reference: ${_bankAdmin!.paymentReference}',
-                            style: secondaryTextStyle()),
-                      if ((_bankAdmin!.bankAddress ?? '').isNotEmpty)
-                        Text('Bank Address: ${_bankAdmin!.bankAddress}',
-                            style: secondaryTextStyle()),
-                      if ((_bankAdmin!.country ?? '').isNotEmpty)
-                        Text('Country: ${_bankAdmin!.country}',
-                            style: secondaryTextStyle()),
+                      if ((bankAdmin.bankName ?? '').isNotEmpty)
+                        Text('Bank: ${bankAdmin.bankName}', style: secondaryTextStyle()),
+                      if ((bankAdmin.accountHolderName ?? '').isNotEmpty)
+                        Text('Account Holder: ${bankAdmin.accountHolderName}', style: secondaryTextStyle()),
+                      if ((bankAdmin.iban ?? '').isNotEmpty)
+                        Text('IBAN: ${bankAdmin.iban}', style: secondaryTextStyle()),
+                      if ((bankAdmin.bicSwift ?? '').isNotEmpty)
+                        Text('BIC/SWIFT: ${bankAdmin.bicSwift}', style: secondaryTextStyle()),
+                      if ((bankAdmin.paymentReference ?? '').isNotEmpty)
+                        Text('Reference: ${bankAdmin.paymentReference}', style: secondaryTextStyle()),
+                      if ((bankAdmin.bankAddress ?? '').isNotEmpty)
+                        Text('Bank Address: ${bankAdmin.bankAddress}', style: secondaryTextStyle()),
+                      if ((bankAdmin.country ?? '').isNotEmpty)
+                        Text('Country: ${bankAdmin.country}', style: secondaryTextStyle()),
                     ],
                   ),
                 12.height,
                 Text('Your Payment', style: boldTextStyle(size: 16)),
                 8.height,
-                // Payment Date
                 InkWell(
                   onTap: () async {
                     final now = DateTime.now();
@@ -1635,7 +1538,9 @@ class AmOrderSummaryScreenState extends State<AmOrderSummaryScreen> {
                   },
                   child: Container(
                     padding: EdgeInsets.symmetric(
-                        horizontal: spacing_standard, vertical: 14),
+                      horizontal: spacing_standard,
+                      vertical: 14,
+                    ),
                     decoration: BoxDecoration(
                       border: Border.all(color: sh_view_color),
                       borderRadius: BorderRadius.circular(6),
@@ -1673,7 +1578,7 @@ class AmOrderSummaryScreenState extends State<AmOrderSummaryScreen> {
                           6.width,
                           Text('Uploaded', style: secondaryTextStyle()),
                         ],
-                      )
+                      ),
                   ],
                 ),
               ],
@@ -1705,7 +1610,7 @@ class AmOrderSummaryScreenState extends State<AmOrderSummaryScreen> {
             children: <Widget>[
               text("Include VAT",
                   textColor:
-                      appStore.isDarkModeOn ? white : sh_textColorPrimary),
+                  appStore.isDarkModeOn ? white : sh_textColorPrimary),
               Switch(
                 value: _includeVat,
                 thumbColor: WidgetStateProperty.all(sh_colorPrimary),
@@ -1724,10 +1629,10 @@ class AmOrderSummaryScreenState extends State<AmOrderSummaryScreen> {
             children: <Widget>[
               text("Subtotal",
                   textColor:
-                      appStore.isDarkModeOn ? white : sh_textColorPrimary),
+                  appStore.isDarkModeOn ? white : sh_textColorPrimary),
               text(subtotal.toCurrencyFormat(),
                   textColor:
-                      appStore.isDarkModeOn ? white : sh_textColorPrimary,
+                  appStore.isDarkModeOn ? white : sh_textColorPrimary,
                   fontFamily: fontMedium),
             ],
           ).paddingTop(spacing_middle),
@@ -1737,7 +1642,7 @@ class AmOrderSummaryScreenState extends State<AmOrderSummaryScreen> {
             children: <Widget>[
               text("Shipping",
                   textColor:
-                      appStore.isDarkModeOn ? white : sh_textColorPrimary),
+                  appStore.isDarkModeOn ? white : sh_textColorPrimary),
               text(shippingCost.toCurrencyFormat(),
                   textColor: shippingCost > 0
                       ? (appStore.isDarkModeOn ? white : sh_textColorPrimary)
@@ -1752,10 +1657,10 @@ class AmOrderSummaryScreenState extends State<AmOrderSummaryScreen> {
               children: <Widget>[
                 text("VAT",
                     textColor:
-                        appStore.isDarkModeOn ? white : sh_textColorPrimary),
+                    appStore.isDarkModeOn ? white : sh_textColorPrimary),
                 text(vatAmount.toCurrencyFormat(),
                     textColor:
-                        appStore.isDarkModeOn ? white : sh_textColorPrimary,
+                    appStore.isDarkModeOn ? white : sh_textColorPrimary,
                     fontFamily: fontMedium),
               ],
             ),
@@ -1819,94 +1724,97 @@ class AmOrderSummaryScreenState extends State<AmOrderSummaryScreen> {
   }
 
   Widget _placeOrderButtonWidget() {
-    return Container(
-      height: 60,
-      width: double.infinity,
-      margin: EdgeInsets.only(
-          left: spacing_standard_new,
-          right: spacing_standard_new,
-          bottom: spacing_standard_new),
-      child: AppButton(
+    return SafeArea(
+      top: false,
+      child: Container(
+        height: 60,
         width: double.infinity,
-        onTap: () async {
-          if (list.isEmpty) {
-            toast('Your cart is empty.');
-            return;
-          }
-          if (addressList.isEmpty) {
-            toast('Please add a shipping address.');
-            return;
-          }
-          final name = contactName.trim();
-          final phone = contactPhone.trim();
-          final email = contactEmail.trim();
-          if (name.isEmpty || phone.isEmpty || email.isEmpty) {
-            toast('Please fill all Contact Information fields.');
-            return;
-          }
-          final emailOk = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(email);
-          if (!emailOk) {
-            toast('Please add a valid email in Contact Information');
-            return;
-          }
-
-          showDialog(
-            context: context,
-            barrierDismissible: false,
-            builder: (context) => Center(child: CircularProgressIndicator()),
-          );
-
-          try {
-            if (selectedPaymentMethod == 'Stripe') {
-              await _ensureGuestAccountIfNeeded();
-              finish(context);
-              await StripeServices.instance.makePayment(
-                amount: totalAmount,
-                currency: 'gbp',
-                onSuccess: () async {
-                  await _finalizeOrderGlobal();
-                },
-                onError: (error) {
-                  toast(error);
-                },
-              );
-            } else if (selectedPaymentMethod == 'Bank Transfer') {
-              if (_bankPaymentDate == null) {
-                toast('Please select Payment Date');
-                Navigator.of(context, rootNavigator: true).pop();
-                return;
-              }
-              await _ensureGuestAccountIfNeeded();
-              final details = {
-                'method': 'bank_transfer',
-                'payment_date': Timestamp.fromDate(_bankPaymentDate!),
-                'proof_url': _bankProofUrl ?? '',
-                'admin_bank': {
-                  'bank_name': _bankAdmin?.bankName ?? '',
-                  'account_holder': _bankAdmin?.accountHolderName ?? '',
-                  'iban': _bankAdmin?.iban ?? '',
-                  'bic_swift': _bankAdmin?.bicSwift ?? '',
-                  'payment_reference_instruction':
-                      _bankAdmin?.paymentReference ?? '',
-                  'bank_address': _bankAdmin?.bankAddress ?? '',
-                  'country': _bankAdmin?.country ?? '',
-                }
-              };
-              await _finalizeOrderGlobal(paymentDetails: details);
-            } else {
-              await _ensureGuestAccountIfNeeded();
-              await _finalizeOrderGlobal();
+        margin: EdgeInsets.only(
+            left: spacing_standard_new,
+            right: spacing_standard_new,
+            bottom: spacing_standard_new),
+        child: AppButton(
+          width: double.infinity,
+          onTap: () async {
+            if (list.isEmpty) {
+              toast('Your cart is empty.');
+              return;
             }
-          } catch (e) {
-            toast(e.toString());
-          }
-        },
-        text: "Place Order",
-        color: sh_colorPrimary,
-        textColor: sh_white,
-        textStyle: boldTextStyle(color: sh_white, size: 18),
-        shapeBorder:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+            if (addressList.isEmpty) {
+              toast('Please add a shipping address.');
+              return;
+            }
+            final name = contactName.trim();
+            final phone = contactPhone.trim();
+            final email = contactEmail.trim();
+            if (name.isEmpty || phone.isEmpty || email.isEmpty) {
+              toast('Please fill all Contact Information fields.');
+              return;
+            }
+            final emailOk = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(email);
+            if (!emailOk) {
+              toast('Please add a valid email in Contact Information');
+              return;
+            }
+
+            showDialog(
+              context: context,
+              barrierDismissible: false,
+              builder: (context) => Center(child: CircularProgressIndicator()),
+            );
+
+            try {
+              if (selectedPaymentMethod == 'Stripe') {
+                await _ensureGuestAccountIfNeeded();
+                finish(context);
+                await StripeServices.instance.makePayment(
+                  amount: totalAmount,
+                  currency: 'gbp',
+                  onSuccess: () async {
+                    await _finalizeOrderGlobal();
+                  },
+                  onError: (error) {
+                    toast(error);
+                  },
+                );
+              } else if (selectedPaymentMethod == 'Bank Transfer') {
+                if (_bankPaymentDate == null) {
+                  toast('Please select Payment Date');
+                  Navigator.of(context, rootNavigator: true).pop();
+                  return;
+                }
+                await _ensureGuestAccountIfNeeded();
+                final details = {
+                  'method': 'bank_transfer',
+                  'payment_date': Timestamp.fromDate(_bankPaymentDate!),
+                  'proof_url': _bankProofUrl ?? '',
+                  'admin_bank': {
+                    'bank_name': _bankAdmin?.bankName ?? '',
+                    'account_holder': _bankAdmin?.accountHolderName ?? '',
+                    'iban': _bankAdmin?.iban ?? '',
+                    'bic_swift': _bankAdmin?.bicSwift ?? '',
+                    'payment_reference_instruction':
+                    _bankAdmin?.paymentReference ?? '',
+                    'bank_address': _bankAdmin?.bankAddress ?? '',
+                    'country': _bankAdmin?.country ?? '',
+                  }
+                };
+                await _finalizeOrderGlobal(paymentDetails: details);
+              } else {
+                await _ensureGuestAccountIfNeeded();
+                await _finalizeOrderGlobal();
+              }
+            } catch (e) {
+              toast(e.toString());
+            }
+          },
+          text: "Place Order",
+          color: sh_colorPrimary,
+          textColor: sh_white,
+          textStyle: boldTextStyle(color: sh_white, size: 18),
+          shapeBorder:
+          RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+        ),
       ),
     );
   }

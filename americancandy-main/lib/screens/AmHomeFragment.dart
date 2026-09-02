@@ -71,7 +71,9 @@ class AmHomeFragmentState extends State<AmHomeFragment> {
       firestoreProducts = querySnapshot.docs
           .map((doc) => AmProductModel.fromQuerySnapshot(doc))
           .where((p) => p.status == 'active' || p.status == null)
-          .toList();
+          .toList()
+          ..sort((a, b) =>
+              (b.createdAt ?? DateTime(0)).compareTo(a.createdAt ?? DateTime(0)));
     } catch (e) {
       print('Error loading Firestore products: $e');
     }

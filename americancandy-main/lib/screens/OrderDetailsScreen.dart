@@ -516,51 +516,52 @@ class _ProductRow extends StatelessWidget {
   final String imagePath;
   const _ProductRow(
       {Key? key,
-      required this.name,
-      required this.price,
-      required this.qtyText,
-      required this.imagePath})
+        required this.name,
+        required this.price,
+        required this.qtyText,
+        required this.imagePath})
       : super(key: key);
   @override
   Widget build(BuildContext context) {
     return Row(children: [
       ClipRRect(
-        borderRadius: BorderRadius.circular(24),
-        child: imagePath.startsWith('http')
-            ? Image.network(imagePath,
-                width: 48,
-                height: 48,
-                fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) =>
-                    Container(width: 48, height: 48, color: Colors.grey[300]))
-            : Image.asset(imagePath,
-                width: 48,
-                height: 48,
-                fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) =>
-                    Container(width: 48, height: 48, color: Colors.grey[300])),
+        borderRadius: BorderRadius.circular(8), // rectangle, not circle
+        child: Container(
+          width: 48,
+          height: 48,
+          color: Colors.grey[200], // letterbox background for uncropped images
+          child: imagePath.startsWith('http')
+              ? Image.network(imagePath,
+              fit: BoxFit.contain, // shows whole image, no cropping
+              errorBuilder: (_, __, ___) =>
+                  Container(color: Colors.grey[300]))
+              : Image.asset(imagePath,
+              fit: BoxFit.contain,
+              errorBuilder: (_, __, ___) =>
+                  Container(color: Colors.grey[300])),
+        ),
       ),
       12.width,
       Expanded(
           child:
-              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text(name,
-            style: GoogleFonts.workSans(
-                fontSize: 14,
-                fontWeight: FontWeight.w800,
-                color: sh_colorPrimary)),
-        6.height,
-        Text(qtyText,
-            style: GoogleFonts.workSans(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: sh_textColorSecondary)),
-      ])),
+          Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(name,
+                style: GoogleFonts.workSans(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w800,
+                    color: sh_colorPrimary)),
+            6.height,
+            Text(qtyText,
+                style: GoogleFonts.workSans(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: sh_textColorSecondary)),
+          ])),
       ShaderMask(
           shaderCallback: (bounds) => const LinearGradient(
-                  colors: [sh_gradient_1st, sh_gradient_2nd],
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight)
+              colors: [sh_gradient_1st, sh_gradient_2nd],
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight)
               .createShader(Rect.fromLTWH(0, 0, bounds.width, bounds.height)),
           child: Text('£${price.toStringAsFixed(2)}',
               style: GoogleFonts.workSans(

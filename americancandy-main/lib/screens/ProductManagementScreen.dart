@@ -33,6 +33,10 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> {
   String? _sortColumn;
   bool _sortAscending = true;
 
+  static const double _kImageColWidth = 52;
+  static const double _kPriceColWidth = 84;
+  static const double _kActionColWidth = 84;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -43,9 +47,9 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> {
             color: appStore.isDarkModeOn ? white : sh_textColorPrimary),
         title: ShaderMask(
           shaderCallback: (bounds) => const LinearGradient(
-                  colors: [sh_gradient_1st, sh_gradient_2nd],
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight)
+              colors: [sh_gradient_1st, sh_gradient_2nd],
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight)
               .createShader(Rect.fromLTWH(0, 0, bounds.width, bounds.height)),
           child: Text(sh_app_name,
               style: GoogleFonts.workSans(
@@ -85,21 +89,21 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> {
                         hintStyle: secondaryTextStyle(),
                         border: InputBorder.none,
                         prefixIcon:
-                            Icon(Icons.search, color: sh_textColorSecondary),
+                        Icon(Icons.search, color: sh_textColorSecondary),
                         suffixIcon: _searchController.text.isNotEmpty
                             ? IconButton(
-                                icon: Icon(Icons.clear,
-                                    color: sh_textColorSecondary),
-                                onPressed: () {
-                                  _searchController.clear();
-                                  setState(() {
-                                    _searchQuery = '';
-                                  });
-                                },
-                              )
+                          icon: Icon(Icons.clear,
+                              color: sh_textColorSecondary),
+                          onPressed: () {
+                            _searchController.clear();
+                            setState(() {
+                              _searchQuery = '';
+                            });
+                          },
+                        )
                             : null,
                         contentPadding:
-                            EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                        EdgeInsets.symmetric(vertical: 12, horizontal: 16),
                       ),
                     ),
                   ),
@@ -129,7 +133,7 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> {
           12.height,
           Padding(
             padding:
-                const EdgeInsets.symmetric(horizontal: spacing_standard_new),
+            const EdgeInsets.symmetric(horizontal: spacing_standard_new),
             child: Row(
               children: [
                 Expanded(
@@ -170,7 +174,7 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> {
           12.height,
           Padding(
             padding:
-                const EdgeInsets.symmetric(horizontal: spacing_standard_new),
+            const EdgeInsets.symmetric(horizontal: spacing_standard_new),
             child: Container(
               decoration: BoxDecoration(
                   gradient: const LinearGradient(
@@ -182,7 +186,7 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> {
                     horizontal: spacing_standard_new, vertical: 14),
                 child: Row(children: [
                   SizedBox(
-                      width: 52,
+                      width: _kImageColWidth,
                       child: Text('Image',
                           style: GoogleFonts.workSans(
                               fontSize: 13,
@@ -200,11 +204,14 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> {
                       }),
                       child: Row(
                         children: [
-                          Text('Name',
-                              style: GoogleFonts.workSans(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w700,
-                                  color: sh_white)),
+                          Flexible(
+                            child: Text('Name',
+                                overflow: TextOverflow.ellipsis,
+                                style: GoogleFonts.workSans(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w700,
+                                    color: sh_white)),
+                          ),
                           if (_sortColumn == 'name')
                             Icon(
                               _sortAscending
@@ -218,7 +225,7 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> {
                     ),
                   ),
                   SizedBox(
-                    width: 90,
+                    width: _kPriceColWidth,
                     child: InkWell(
                       onTap: () => setState(() {
                         if (_sortColumn == 'price') {
@@ -231,12 +238,15 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
-                          Text('Price',
-                              textAlign: TextAlign.right,
-                              style: GoogleFonts.workSans(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w700,
-                                  color: sh_white)),
+                          Flexible(
+                            child: Text('Price',
+                                textAlign: TextAlign.right,
+                                overflow: TextOverflow.ellipsis,
+                                style: GoogleFonts.workSans(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w700,
+                                    color: sh_white)),
+                          ),
                           if (_sortColumn == 'price')
                             Icon(
                               _sortAscending
@@ -249,9 +259,9 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> {
                       ),
                     ),
                   ),
-                  SizedBox(width: 10),
+                  SizedBox(width: 8),
                   SizedBox(
-                      width: 72,
+                      width: _kActionColWidth,
                       child: Text('Action',
                           textAlign: TextAlign.right,
                           style: GoogleFonts.workSans(
@@ -266,7 +276,7 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> {
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
               stream:
-                  FirebaseFirestore.instance.collection('Products').snapshots(),
+              FirebaseFirestore.instance.collection('Products').snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.hasError)
                   return Center(child: Text('Error: ${snapshot.error}'));
@@ -314,6 +324,10 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> {
                         ? priceA.compareTo(priceB)
                         : priceB.compareTo(priceA);
                   });
+                } else {
+                  // Default sort: newest products first by createdAt
+                  filtered.sort((a, b) => (b.createdAt ?? DateTime(0))
+                      .compareTo(a.createdAt ?? DateTime(0)));
                 }
 
                 return ListView.separated(
@@ -332,128 +346,153 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> {
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(16),
                             boxShadow:
-                                defaultBoxShadow(shadowColor: appShadowColor)),
+                            defaultBoxShadow(shadowColor: appShadowColor)),
                         child: Padding(
                           padding: const EdgeInsets.symmetric(
                               horizontal: spacing_standard_new, vertical: 12),
-                          child: Row(children: [
-                            _GlowImage(
-                                path: (p.images != null && p.images!.isNotEmpty)
-                                    ? p.images!.first
-                                    : ''),
-                            12.width,
-                            Expanded(
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              _GlowImage(
+                                  path: (p.images != null &&
+                                      p.images!.isNotEmpty)
+                                      ? p.images!.first
+                                      : ''),
+                              12.width,
+                              Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        p.name ?? 'No Name',
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: GoogleFonts.workSans(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w700,
+                                            color: sh_textColorPrimary),
+                                      ),
+                                      if (p.brand != null && p.brand!.isNotEmpty)
+                                        Text(p.brand!,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: GoogleFonts.workSans(
+                                                fontSize: 12,
+                                                color: sh_textColorSecondary)),
+                                      6.height,
+                                      Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 8, vertical: 4),
+                                            decoration: BoxDecoration(
+                                                color: _getStatusColor(p.status)
+                                                    .withOpacity(0.18),
+                                                borderRadius:
+                                                BorderRadius.circular(8)),
+                                            child: Text(
+                                                (p.status ?? 'active')
+                                                    .toUpperCase(),
+                                                style: GoogleFonts.workSans(
+                                                    fontSize: 10,
+                                                    fontWeight: FontWeight.w700,
+                                                    color: _getStatusColor(
+                                                        p.status))),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  )),
+                              SizedBox(
+                                width: _kPriceColWidth,
                                 child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  p.name ?? 'No Name',
-                                  maxLines: 3,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: GoogleFonts.workSans(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w700,
-                                      color: sh_textColorPrimary),
-                                ),
-                                if (p.brand != null && p.brand!.isNotEmpty)
-                                  Text(p.brand!,
-                                      style: GoogleFonts.workSans(
-                                          fontSize: 12,
-                                          color: sh_textColorSecondary)),
-                                6.height,
-                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 8, vertical: 4),
-                                      decoration: BoxDecoration(
-                                          color: _getStatusColor(p.status)
-                                              .withOpacity(0.18),
-                                          borderRadius:
-                                              BorderRadius.circular(8)),
+                                    FittedBox(
+                                      fit: BoxFit.scaleDown,
+                                      alignment: Alignment.centerRight,
                                       child: Text(
-                                          (p.status ?? 'active').toUpperCase(),
+                                          '£${(p.price ?? 0).toStringAsFixed(2)}',
+                                          textAlign: TextAlign.right,
                                           style: GoogleFonts.workSans(
-                                              fontSize: 10,
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w800,
+                                              color: sh_textColorPrimary)),
+                                    ),
+                                    4.height,
+                                    FittedBox(
+                                      fit: BoxFit.scaleDown,
+                                      alignment: Alignment.centerRight,
+                                      child: Text(
+                                          'Stock - ${(p.availableQuantity ?? 0).toString()}',
+                                          textAlign: TextAlign.right,
+                                          style: GoogleFonts.workSans(
+                                              fontSize: 11,
                                               fontWeight: FontWeight.w700,
-                                              color:
-                                                  _getStatusColor(p.status))),
+                                              color: sh_textColorSecondary)),
                                     ),
                                   ],
                                 ),
-                              ],
-                            )),
-                            SizedBox(
-                              width: 90,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  Text('£${(p.price ?? 0).toStringAsFixed(2)}',
-                                      textAlign: TextAlign.right,
-                                      style: GoogleFonts.workSans(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w800,
-                                          color: sh_textColorPrimary)),
-                                  4.height,
-                                  Text(
-                                      'Stock - ${(p.availableQuantity ?? 0).toString()}',
-                                      textAlign: TextAlign.right,
-                                      style: GoogleFonts.workSans(
-                                          fontSize: 11,
-                                          fontWeight: FontWeight.w700,
-                                          color: sh_textColorSecondary)),
-                                ],
                               ),
-                            ),
-                            SizedBox(width: 10),
-                            SizedBox(
-                                width: 72,
-                                child: Align(
-                                    alignment: Alignment.centerRight,
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.end,
-                                      children: [
-                                        InkWell(
-                                          onTap: () async {
-                                            if (p.id == null) return;
-                                            try {
-                                              await FirebaseFirestore.instance
-                                                  .collection('Products')
-                                                  .doc(p.id)
-                                                  .update({
-                                                'product_status': 'delete'
-                                              });
-                                              toast('Moved to Delete');
-                                            } catch (e) {
-                                              toast('Delete failed: $e');
-                                            }
-                                          },
-                                          child: Padding(
-                                            padding: const EdgeInsets.all(6),
-                                            child: Icon(Icons.delete_outline,
-                                                size: 18,
-                                                color: Colors.redAccent),
+                              SizedBox(width: 8),
+                              SizedBox(
+                                  width: _kActionColWidth,
+                                  child: Align(
+                                      alignment: Alignment.centerRight,
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        mainAxisAlignment:
+                                        MainAxisAlignment.end,
+                                        children: [
+                                          InkWell(
+                                            onTap: () async {
+                                              if (p.id == null) return;
+                                              try {
+                                                await FirebaseFirestore
+                                                    .instance
+                                                    .collection('Products')
+                                                    .doc(p.id)
+                                                    .update({
+                                                  'product_status': 'delete'
+                                                });
+                                                toast('Moved to Delete');
+                                              } catch (e) {
+                                                toast('Delete failed: $e');
+                                              }
+                                            },
+                                            child: const Padding(
+                                              padding: EdgeInsets.all(3),
+                                              child: Icon(
+                                                  Icons.delete_outline,
+                                                  size: 18,
+                                                  color: Colors.redAccent),
+                                            ),
                                           ),
-                                        ),
-                                        InkWell(
-                                          onTap: () {
-                                            ProductDetailsScreen(product: p)
-                                                .launch(context);
-                                          },
-                                          child: Padding(
-                                            padding: const EdgeInsets.all(6),
-                                            child: Icon(Icons.edit,
-                                                size: 18,
-                                                color: sh_textColorSecondary),
+                                          InkWell(
+                                            onTap: () {
+                                              ProductDetailsScreen(product: p)
+                                                  .launch(context);
+                                            },
+                                            child: Padding(
+                                              padding:
+                                              const EdgeInsets.all(3),
+                                              child: Icon(Icons.edit,
+                                                  size: 18,
+                                                  color:
+                                                  sh_textColorSecondary),
+                                            ),
                                           ),
-                                        ),
-                                        4.width,
-                                        Icon(Icons.arrow_forward_ios,
-                                            size: 16,
-                                            color: sh_textColorSecondary),
-                                      ],
-                                    )))
-                          ]),
+                                          2.width,
+                                          Icon(Icons.arrow_forward_ios,
+                                              size: 14,
+                                              color: sh_textColorSecondary),
+                                        ],
+                                      )))
+                            ],
+                          ),
                         ),
                       ),
                     );
@@ -581,23 +620,23 @@ class _GlowImage extends StatelessWidget {
         borderRadius: BorderRadius.circular(24),
         child: path.startsWith('http')
             ? CachedNetworkImage(
-                imageUrl: path,
-                fit: BoxFit.cover,
-                placeholder: (context, url) =>
-                    Container(color: Colors.grey[200]),
-                errorWidget: (context, url, error) => Container(
-                  color: Colors.grey[200],
-                  child: const Icon(Icons.broken_image, size: 20),
-                ),
-              )
+          imageUrl: path,
+          fit: BoxFit.cover,
+          placeholder: (context, url) =>
+              Container(color: Colors.grey[200]),
+          errorWidget: (context, url, error) => Container(
+            color: Colors.grey[200],
+            child: const Icon(Icons.broken_image, size: 20),
+          ),
+        )
             : Image.asset(
-                path.isEmpty ? 'images/sweets/img/products/candy-1.jpg' : path,
-                fit: BoxFit.cover,
-                errorBuilder: (c, e, s) => Container(
-                  color: Colors.grey[200],
-                  child: const Icon(Icons.broken_image, size: 20),
-                ),
-              ),
+          path.isEmpty ? 'images/sweets/img/products/candy-1.jpg' : path,
+          fit: BoxFit.cover,
+          errorBuilder: (c, e, s) => Container(
+            color: Colors.grey[200],
+            child: const Icon(Icons.broken_image, size: 20),
+          ),
+        ),
       ),
     );
   }
@@ -653,9 +692,9 @@ class _FilterChip extends StatelessWidget {
   final VoidCallback onTap;
   const _FilterChip(
       {Key? key,
-      required this.label,
-      required this.selected,
-      required this.onTap})
+        required this.label,
+        required this.selected,
+        required this.onTap})
       : super(key: key);
   @override
   Widget build(BuildContext context) {
@@ -685,10 +724,10 @@ class _FilterDrawer extends StatelessWidget {
   final VoidCallback onClear;
   const _FilterDrawer(
       {Key? key,
-      required this.price,
-      required this.onPriceChanged,
-      required this.onApply,
-      required this.onClear})
+        required this.price,
+        required this.onPriceChanged,
+        required this.onApply,
+        required this.onClear})
       : super(key: key);
   @override
   Widget build(BuildContext context) {
@@ -698,13 +737,13 @@ class _FilterDrawer extends StatelessWidget {
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(spacing_standard_new),
           child:
-              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Row(children: [
               ShaderMask(
                   shaderCallback: (b) => const LinearGradient(
-                          colors: [sh_gradient_1st, sh_gradient_2nd],
-                          begin: Alignment.centerLeft,
-                          end: Alignment.centerRight)
+                      colors: [sh_gradient_1st, sh_gradient_2nd],
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight)
                       .createShader(Rect.fromLTWH(0, 0, b.width, b.height)),
                   child: Text('Filter',
                       style: GoogleFonts.workSans(
@@ -772,10 +811,10 @@ class _PillAction extends StatelessWidget {
   final VoidCallback onTap;
   const _PillAction(
       {Key? key,
-      required this.label,
-      required this.onTap,
-      this.bgColor,
-      this.gradient})
+        required this.label,
+        required this.onTap,
+        this.bgColor,
+        this.gradient})
       : super(key: key);
   @override
   Widget build(BuildContext context) {

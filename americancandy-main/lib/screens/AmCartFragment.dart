@@ -164,23 +164,40 @@ class AmCartFragmentState extends State<AmCartFragment> {
                       height: width * 0.25,
                       margin: EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        shape: BoxShape.circle,
+                        borderRadius: BorderRadius.circular(12), // rectangle with rounded corners
                         border: Border.all(color: sh_view_color, width: 1),
                       ),
-                      child: ClipOval(
-                        child: (product.thumbnail != null &&
-                                product.thumbnail!.isNotEmpty)
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(12), // must match the Container's radius
+                        child: (product.thumbnail != null && product.thumbnail!.isNotEmpty)
                             ? (product.thumbnail!.startsWith('http')
-                                ? Image.network(
-                                    product.thumbnail!,
-                                    fit: BoxFit.cover,
-                                  )
-                                : Image.asset(
-                                    "images/sweets/img/products" +
-                                        product.thumbnail!,
-                                    fit: BoxFit.cover,
-                                  ))
-                            : Icon(Icons.image_not_supported),
+                            ? Image.network(
+                          product.thumbnail!,
+                          fit: BoxFit.cover,
+                          width: double.infinity,
+                          height: double.infinity,
+                          errorBuilder: (context, error, stackTrace) => Container(
+                            color: sh_view_color,
+                            alignment: Alignment.center,
+                            child: Icon(Icons.image_not_supported),
+                          ),
+                        )
+                            : Image.asset(
+                          "images/sweets/img/products" + product.thumbnail!,
+                          fit: BoxFit.cover,
+                          width: double.infinity,
+                          height: double.infinity,
+                          errorBuilder: (context, error, stackTrace) => Container(
+                            color: sh_view_color,
+                            alignment: Alignment.center,
+                            child: Icon(Icons.image_not_supported),
+                          ),
+                        ))
+                            : Container(
+                          color: sh_view_color,
+                          alignment: Alignment.center,
+                          child: Icon(Icons.image_not_supported),
+                        ),
                       ),
                     ),
                     Expanded(

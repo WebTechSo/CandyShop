@@ -61,7 +61,7 @@ class AmPaymentMethod {
   factory AmPaymentMethod.fromJson(Map<String, dynamic> json) {
     return AmPaymentMethod(
       id: json['id'],
-      type: json['type'] ?? 'stripe',
+      type: json['type'] ?? 'cash on delivery',
       name: json['name'],
       paymentMode: json['payment_mode'],
       testSecretKey: json['test_secret_key'],

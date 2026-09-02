@@ -182,8 +182,8 @@ class AmProductDetailState extends State<AmProductDetail> {
           final int qty = (q is int)
               ? q
               : (q is num)
-                  ? q.toInt()
-                  : int.tryParse(q.toString()) ?? 1;
+              ? q.toInt()
+              : int.tryParse(q.toString()) ?? 1;
           qtyByProductId[pid] = (qtyByProductId[pid] ?? 0) + qty;
         }
       } catch (_) {}
@@ -208,10 +208,10 @@ class AmProductDetailState extends State<AmProductDetail> {
 
       int? catId = _currentProduct.category;
       String catNameNorm = (categoryName.isNotEmpty
-                  ? categoryName
-                  : _currentProduct.categoryName)
-              ?.toLowerCase()
-              .trim() ??
+          ? categoryName
+          : _currentProduct.categoryName)
+          ?.toLowerCase()
+          .trim() ??
           '';
       if (picked.length < 2) {
         final sameCategory = all.where((p) {
@@ -237,10 +237,10 @@ class AmProductDetailState extends State<AmProductDetail> {
       if (picked.length < 2) {
         final remaining = all
             .where((p) =>
-                p.id != null &&
-                p.id!.isNotEmpty &&
-                p.id != currentId &&
-                !pickedIds.contains(p.id))
+        p.id != null &&
+            p.id!.isNotEmpty &&
+            p.id != currentId &&
+            !pickedIds.contains(p.id))
             .toList()
           ..shuffle();
         picked.addAll(remaining.take(2 - picked.length));
@@ -325,7 +325,7 @@ class AmProductDetailState extends State<AmProductDetail> {
   Future<List<AmReview>> loadProducts() async {
     try {
       String jsonString =
-          await loadContentAsset('assets/sweet_data/reviews.json');
+      await loadContentAsset('assets/sweet_data/reviews.json');
       final jsonResponse = json.decode(jsonString);
       return (jsonResponse as List).map((i) => AmReview.fromJson(i)).toList();
     } catch (e) {
@@ -402,14 +402,20 @@ class AmProductDetailState extends State<AmProductDetail> {
     final product = _currentProduct;
     final bool inStock = (product.availableQuantity ?? 0) > 0;
 
-    final double bottomStickyBarHeight = 70.0;
+    // Safe-area inset for devices with a 3-button nav bar or gesture indicator.
+    final double bottomSafeInset = MediaQuery.of(context).padding.bottom;
+    final double bottomStickyBarContentHeight = 70.0;
+    // Total on-screen height of the sticky bar, including the safe-area inset.
+    final double bottomStickyBarHeight =
+        bottomStickyBarContentHeight + bottomSafeInset;
+    // Extra breathing room so the last scrollable item isn't flush against the bar.
     final double bottomPaddingForContent = bottomStickyBarHeight + 16.0;
 
     // --- Safe Image Handling ---
     final displayImageSrc = _resolvePrimaryImage(product);
     bool isNetworkImage = displayImageSrc.startsWith('http');
     final displayImagePath =
-        isNetworkImage ? displayImageSrc : _assetImagePath(displayImageSrc);
+    isNetworkImage ? displayImageSrc : _assetImagePath(displayImageSrc);
 
     // --- Custom Header Content (Image) ---
     var imageSection = SizedBox(
@@ -420,24 +426,24 @@ class AmProductDetailState extends State<AmProductDetail> {
           Positioned.fill(
             child: isNetworkImage
                 ? CachedNetworkImage(
-                    imageUrl: displayImagePath,
-                    fit: BoxFit.cover,
-                    placeholder: (context, url) => Container(
-                        color: sh_view_color,
-                        child: Center(child: CircularProgressIndicator())),
-                    errorWidget: (context, url, error) => Container(
-                        color: sh_view_color,
-                        child: Center(
-                            child: Icon(Icons.image_not_supported, size: 80))),
-                  )
+              imageUrl: displayImagePath,
+              fit: BoxFit.cover,
+              placeholder: (context, url) => Container(
+                  color: sh_view_color,
+                  child: Center(child: CircularProgressIndicator())),
+              errorWidget: (context, url, error) => Container(
+                  color: sh_view_color,
+                  child: Center(
+                      child: Icon(Icons.image_not_supported, size: 80))),
+            )
                 : Image.asset(
-                    displayImagePath,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) => Container(
-                        color: sh_view_color,
-                        child: Center(
-                            child: Icon(Icons.image_not_supported, size: 80))),
-                  ),
+              displayImagePath,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) => Container(
+                  color: sh_view_color,
+                  child: Center(
+                      child: Icon(Icons.image_not_supported, size: 80))),
+            ),
           ),
         ],
       ),
@@ -537,8 +543,8 @@ class AmProductDetailState extends State<AmProductDetail> {
                   color: (product.availableQuantity ?? 0) > 0
                       ? null
                       : (appStore.isDarkModeOn
-                          ? Colors.lightGreenAccent.shade400
-                          : Colors.redAccent)),
+                      ? Colors.lightGreenAccent.shade400
+                      : Colors.redAccent)),
             ).paddingTop(2),
           if (product.priceDescription.validate().isNotEmpty)
             Text(
@@ -562,9 +568,7 @@ class AmProductDetailState extends State<AmProductDetail> {
           Text("Product Description", style: boldTextStyle(size: 18))
               .paddingBottom(spacing_control),
           Text(
-            product.description.validate(
-                value:
-                    "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam arcu mauris, scelerisque eu mauris id, pretium pulvinar sapien."),
+            product.description.validate(),
             maxLines: isExpanded ? null : 3,
             style: secondaryTextStyle(),
           ),
@@ -646,7 +650,7 @@ class AmProductDetailState extends State<AmProductDetail> {
                         snapshot.data != null &&
                         snapshot.data!.docs.isNotEmpty) {
                       var data = snapshot.data!.docs.first.data()
-                          as Map<String, dynamic>;
+                      as Map<String, dynamic>;
                       return Text(data['name'] ?? product.category.toString(),
                           style: primaryTextStyle(
                               size: 16,
@@ -675,7 +679,7 @@ class AmProductDetailState extends State<AmProductDetail> {
                   future: FirebaseFirestore.instance
                       .collection('Brands')
                       .where('id',
-                          isEqualTo: int.tryParse(product.brand.validate()))
+                      isEqualTo: int.tryParse(product.brand.validate()))
                       .limit(1)
                       .get(),
                   builder: (context, snapshot) {
@@ -683,7 +687,7 @@ class AmProductDetailState extends State<AmProductDetail> {
                         snapshot.data != null &&
                         snapshot.data!.docs.isNotEmpty) {
                       var data = snapshot.data!.docs.first.data()
-                          as Map<String, dynamic>;
+                      as Map<String, dynamic>;
                       return Text(data['name'] ?? product.brand!,
                           style: primaryTextStyle(
                               size: 16,
@@ -720,7 +724,7 @@ class AmProductDetailState extends State<AmProductDetail> {
                   Text("See All",
                       style: primaryTextStyle(
                           color:
-                              appStore.isDarkModeOn ? white : sh_colorPrimary)),
+                          appStore.isDarkModeOn ? white : sh_colorPrimary)),
                   Icon(Icons.arrow_forward_ios,
                       size: 14,
                       color: appStore.isDarkModeOn ? white : sh_colorPrimary),
@@ -732,7 +736,7 @@ class AmProductDetailState extends State<AmProductDetail> {
                         ? categoryName
                         : product.categoryName);
                 AmViewAllProductscreen(
-                        category: cat, title: cat.name ?? "Category")
+                    category: cat, title: cat.name ?? "Category")
                     .launch(context);
               })
             ],
@@ -757,7 +761,7 @@ class AmProductDetailState extends State<AmProductDetail> {
 
             final left = popularProducts.first;
             final right =
-                popularProducts.length > 1 ? popularProducts[1] : null;
+            popularProducts.length > 1 ? popularProducts[1] : null;
 
             return SizedBox(
               height: tileHeight,
@@ -797,10 +801,15 @@ class AmProductDetailState extends State<AmProductDetail> {
     );
 
     // --- Sticky Quantity and Cart Bar ---
+    // NOTE: padding.bottom (bottomSafeInset) is added below the row so the
+    // buttons are never covered by a 3-button nav bar or gesture indicator.
     var stickyBottomBar = Container(
-      height: bottomStickyBarHeight,
-      padding: EdgeInsets.symmetric(
-          horizontal: spacing_standard_new, vertical: spacing_control_half),
+      padding: EdgeInsets.only(
+        left: spacing_standard_new,
+        right: spacing_standard_new,
+        top: spacing_control_half,
+        bottom: spacing_control_half + bottomSafeInset,
+      ),
       decoration: BoxDecoration(
         color: context.cardColor,
         boxShadow: [
@@ -814,10 +823,10 @@ class AmProductDetailState extends State<AmProductDetail> {
           Container(
             height: 40,
             padding:
-                EdgeInsets.symmetric(horizontal: spacing_middle, vertical: 0),
+            EdgeInsets.symmetric(horizontal: spacing_middle, vertical: 0),
             decoration: BoxDecoration(
               gradient:
-                  LinearGradient(colors: [sh_gradient_1st, sh_gradient_2nd]),
+              LinearGradient(colors: [sh_gradient_1st, sh_gradient_2nd]),
               borderRadius: BorderRadius.circular(30),
             ),
             child: Row(
@@ -849,87 +858,104 @@ class AmProductDetailState extends State<AmProductDetail> {
           ),
           8.width,
 
-          // Add to Cart Button
-          // Add to Cart Button (compact, fits content)
-          InkWell(
-            borderRadius: BorderRadius.circular(30),
-            onTap: !inStock
-                ? null
-                : () async {
-                    if (product.id != null) {
+          // Add to Cart + Buy Now share the remaining width equally, so both
+          // buttons always get the same padding/width regardless of their
+          // text length ("Add to Cart" vs "Out of Stock" vs "Buy Now").
+          Expanded(
+            child: Row(
+              children: [
+                // Add to Cart Button (equal-width)
+                Expanded(
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(30),
+                    onTap: !inStock
+                        ? null
+                        : () async {
+                      if (product.id != null) {
+                        try {
+                          await CartService().addToCart(product,
+                              quantity: productQuantity);
+                          toast('Added $productQuantity to cart');
+                        } catch (e) {
+                          toast(e.toString());
+                        }
+                      }
+                    },
+                    child: Container(
+                      height: 40,
+                      padding: EdgeInsets.symmetric(
+                          horizontal: spacing_middle, vertical: 0),
+                      decoration: BoxDecoration(
+                        color: inStock ? sh_colorPrimary : sh_view_color,
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      alignment: Alignment.center,
+                      child: Text(inStock ? "Add to Cart" : "Out of Stock",
+                          textAlign: TextAlign.center,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: boldTextStyle(
+                              color: !inStock && appStore.isDarkModeOn
+                                  ? Colors.lightGreenAccent.shade400
+                                  : white)),
+                    ),
+                  ),
+                ),
+                8.width,
+                // Buy Now Button (equal-width, gradient background)
+                Expanded(
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(30),
+                    onTap: !inStock
+                        ? null
+                        : () async {
                       try {
-                        await CartService()
-                            .addToCart(product, quantity: productQuantity);
-                        toast('Added $productQuantity to cart');
+                        await CartService().addToCart(widget.product,
+                            quantity: productQuantity);
                       } catch (e) {
                         toast(e.toString());
+                        return;
                       }
-                    }
-                  },
-            child: Container(
-              height: 40,
-              padding:
-                  EdgeInsets.symmetric(horizontal: spacing_middle, vertical: 0),
-              decoration: BoxDecoration(
-                color: inStock ? sh_colorPrimary : sh_view_color,
-                borderRadius: BorderRadius.circular(30),
-              ),
-              alignment: Alignment.center,
-              child: Text(inStock ? "Add to Cart" : "Out of Stock",
-                  style: boldTextStyle(
-                      color: !inStock && appStore.isDarkModeOn
-                          ? Colors.lightGreenAccent.shade400
-                          : white)),
-            ),
-          ),
-          8.width,
-          // Buy Now Button (White text, CUSTOM GRADIENT BG)
-          // Buy Now Button (compact gradient, fits content)
-          InkWell(
-            borderRadius: BorderRadius.circular(30),
-            onTap: !inStock
-                ? null
-                : () async {
-                    try {
-                      await CartService()
-                          .addToCart(widget.product, quantity: productQuantity);
-                    } catch (e) {
-                      toast(e.toString());
-                      return;
-                    }
-                    if (!mounted) return;
-                    WidgetsBinding.instance.addPostFrameCallback((_) {
                       if (!mounted) return;
-                      Navigator.of(context, rootNavigator: true).push(
-                        MaterialPageRoute(
-                            builder: (_) => AmOrderSummaryScreen()),
-                      );
-                    });
-                  },
-            child: Container(
-              height: 40,
-              padding:
-                  EdgeInsets.symmetric(horizontal: spacing_middle, vertical: 0),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(30),
-                gradient: inStock
-                    ? LinearGradient(
-                        colors: [sh_gradient_1st, sh_gradient_2nd],
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                      )
-                    : LinearGradient(
-                        colors: [sh_view_color, sh_view_color],
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        if (!mounted) return;
+                        Navigator.of(context, rootNavigator: true).push(
+                          MaterialPageRoute(
+                              builder: (_) => AmOrderSummaryScreen()),
+                        );
+                      });
+                    },
+                    child: Container(
+                      height: 40,
+                      padding: EdgeInsets.symmetric(
+                          horizontal: spacing_middle, vertical: 0),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(30),
+                        gradient: inStock
+                            ? LinearGradient(
+                          colors: [sh_gradient_1st, sh_gradient_2nd],
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                        )
+                            : LinearGradient(
+                          colors: [sh_view_color, sh_view_color],
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                        ),
                       ),
-              ),
-              alignment: Alignment.center,
-              child: Text(inStock ? "Buy Now" : "Out of Stock",
-                  style: boldTextStyle(
-                      color: !inStock && appStore.isDarkModeOn
-                          ? Colors.lightGreenAccent.shade400
-                          : white)),
+                      alignment: Alignment.center,
+                      child: Text(inStock ? "Buy Now" : "Out of Stock",
+                          textAlign: TextAlign.center,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: boldTextStyle(
+                              color: !inStock && appStore.isDarkModeOn
+                                  ? Colors.lightGreenAccent.shade400
+                                  : white)),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -937,7 +963,10 @@ class AmProductDetailState extends State<AmProductDetail> {
     );
 
     return Scaffold(
-      // FIX: Ensure entire body is wrapped in SafeArea if needed, but Flutter Scaffold handles it usually.
+      // extendBody lets the scrollable content flow under the transparent
+      // area behind the sticky bar; the bar itself reserves the real safe
+      // area via its own bottom padding above.
+      extendBody: true,
       body: Stack(
         children: <Widget>[
           NestedScrollView(
@@ -959,7 +988,7 @@ class AmProductDetailState extends State<AmProductDetail> {
                   leading: IconButton(
                     icon: Icon(Icons.arrow_back,
                         color:
-                            innerBoxIsScrolled ? sh_textColorPrimary : white),
+                        innerBoxIsScrolled ? sh_textColorPrimary : white),
                     onPressed: () => finish(context),
                   ),
                   title: Text(
@@ -979,7 +1008,9 @@ class AmProductDetailState extends State<AmProductDetail> {
             body: combinedContent,
           ),
 
-          // Sticky Footer
+          // Sticky Footer — pinned to the bottom of the screen; its own
+          // padding (see stickyBottomBar above) clears the safe area so the
+          // buttons never sit behind a 3-button nav bar or gesture pill.
           Positioned(
             bottom: 0,
             left: 0,
@@ -996,9 +1027,9 @@ class AmProductDetailState extends State<AmProductDetail> {
 
   Widget reviewText(rating,
       {size = 15.0,
-      fontSize = textSizeLargeMedium,
-      fontFamily = fontMedium,
-      textColor = sh_textColorPrimary}) {
+        fontSize = textSizeLargeMedium,
+        fontFamily = fontMedium,
+        textColor = sh_textColorPrimary}) {
     // ... (unchanged)
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,

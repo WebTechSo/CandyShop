@@ -71,11 +71,11 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     _descCtrl = TextEditingController(text: widget.product.description);
     _ingCtrl = TextEditingController(text: widget.product.ingredients);
     _priceCtrl = TextEditingController(
-        text: widget.product.price?.toStringAsFixed(2) ?? '0.00');
+        text: widget.product.price?.toStringAsFixed(2) ?? '');
     _unitPriceCtrl = TextEditingController(
         text: widget.product.unitPrice?.toStringAsFixed(2) ??
             widget.product.price?.toStringAsFixed(2) ??
-            '0.00');
+            '');
     _availableQtyCtrl = TextEditingController(
         text: widget.product.availableQuantity?.toString() ?? '');
     _priceDescCtrl =
@@ -566,7 +566,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 _SectionLabel('VAT Rate (%)'),
-                                _CurrencyField(controller: _vatRateCtrl),
+                                _InputField(controller: _vatRateCtrl, hint: "0.00",),
                               ]),
                         ),
                       ]),
@@ -576,7 +576,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                           controller: _priceDescCtrl,
                           hint: 'Price Description....'),
                       16.height,
-                      Text('Variants',
+                      /*Text('Variants',
                           style: GoogleFonts.workSans(
                               fontSize: 16,
                               fontWeight: FontWeight.w800,
@@ -632,7 +632,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                                       setState(() => _country = v!)),
                             ])),
                       ]),
-                      16.height,
+                      16.height,*/
                       _buildImagesList(),
                       20.height,
                       Row(children: [
@@ -847,6 +847,7 @@ class _DropdownField<T> extends StatelessWidget {
     }
     return DropdownButtonFormField<T>(
       initialValue: dropdownValue,
+      isExpanded: true,
       items: List.generate(effectiveItems.length, (index) {
         return DropdownMenuItem<T>(
           value: effectiveItems[index],

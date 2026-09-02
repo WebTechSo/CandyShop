@@ -479,10 +479,11 @@ class _PromoCard extends StatelessWidget {
                         if (route == 'products') {
                           AmHomeScreen(initialTab: 1)
                               .launch(context, isNewTask: true);
-                        } else {
+                        }
+                        /*else {
                           AmHomeScreen(initialTab: 0)
                               .launch(context, isNewTask: true);
-                        }
+                        }*/
                       },
                       shapeBorder: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8)),

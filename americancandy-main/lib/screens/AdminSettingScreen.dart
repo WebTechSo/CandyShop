@@ -47,7 +47,7 @@ class _AdminSettingScreenState extends State<AdminSettingScreen> {
       TextEditingController(); // offer_details
   final TextEditingController _offerButtonCtrl =
       TextEditingController(); // offer_button
-  String _offerRoute = 'categories'; // offer_route
+  String _offerRoute = 'products'; // offer_route
   String _offerBackgroundUrl = ''; // offer_background
   bool _uploadingOfferBg = false;
 
@@ -94,7 +94,7 @@ class _AdminSettingScreenState extends State<AdminSettingScreen> {
             .toString();
         _offerButtonCtrl.text =
             (data['offer_button'] ?? 'Unlock Free Shipping').toString();
-        _offerRoute = (data['offer_route'] ?? 'categories').toString();
+        _offerRoute = (data['offer_route'] ?? 'products').toString();
 
         final rawSizes = data['variant_sizes'];
         if (rawSizes is List) {
@@ -299,7 +299,14 @@ class _AdminSettingScreenState extends State<AdminSettingScreen> {
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
-              padding: const EdgeInsets.all(spacing_standard_new),
+              padding: EdgeInsets.only(
+                left: spacing_standard_new,
+                right: spacing_standard_new,
+                top: spacing_standard_new,
+                bottom: spacing_standard_new +
+                    MediaQuery.of(context).padding.bottom +
+                    16,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -573,13 +580,11 @@ class _AdminSettingScreenState extends State<AdminSettingScreen> {
                     value: _offerRoute,
                     items: const [
                       DropdownMenuItem(
-                          value: 'categories', child: Text('Categories')),
-                      DropdownMenuItem(
                           value: 'products', child: Text('Products')),
                     ],
                     onChanged: (v) {
                       setState(() {
-                        _offerRoute = v ?? 'categories';
+                        _offerRoute = v ?? 'products';
                       });
                     },
                     decoration: InputDecoration(
