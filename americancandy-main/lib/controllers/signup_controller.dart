@@ -190,24 +190,33 @@ class SignUpController extends GetxController {
         final message = missing.isEmpty
             ? 'Please fill all required fields correctly'
             : 'Please fill: ${missing.join(', ')}';
-        Get.snackbar('Validation Error', message);
+        Get.snackbar('Validation Error', message,
+          backgroundColor: Colors.red.withOpacity(0.2),   // red background
+          colorText: Colors.red.shade900,
+        );
         return;
       }
 
       if (!termsAccepted.value) {
-        Get.snackbar('Terms Required', 'Please accept Terms & Conditions');
+        Get.snackbar('Terms Required', 'Please accept Terms & Conditions',
+          backgroundColor: Colors.red.withOpacity(0.2),   // red background
+          colorText: Colors.red.shade900,);
         return;
       }
 
       if (registrationNumberCont.text.isEmpty) {
-        Get.snackbar('Registration no Required', 'Please enter organization no');
+        Get.snackbar('Registration no Required', 'Please enter organization no',
+          backgroundColor: Colors.red.withOpacity(0.2),   // red background
+          colorText: Colors.red.shade900,);
         return;
       }
 
       final isValidOrgNumber = await isValidOrganizationNumber(registrationNumberCont.text);
       if (!isValidOrgNumber) {
         Get.snackbar('Invalid Registration Number',
-            'Please enter a valid organization number');
+            'Please enter a valid organization number',
+          backgroundColor: Colors.red.withOpacity(0.2),   // red background
+          colorText: Colors.red.shade900,);
         return;
       }
 
