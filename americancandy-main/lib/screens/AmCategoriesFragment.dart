@@ -91,7 +91,7 @@ class _AmCategoriesFragmentState extends State<AmCategoriesFragment> {
     super.initState();
     _categoriesStream = FirebaseFirestore.instance
         .collection('Categories')
-        .orderBy('menu_order')
+        .orderBy('menu_order', descending: false)
         .snapshots();
     _ensureProductsLoaded();
   }

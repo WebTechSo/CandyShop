@@ -241,7 +241,7 @@ class AmHomeFragmentState extends State<AmHomeFragment> {
     final newest = filtered.toList()
       ..sort((a, b) =>
           (b.createdAt ?? DateTime(0)).compareTo(a.createdAt ?? DateTime(0)));
-    newestProducts.addAll(newest.take(10));
+    newestProducts.addAll(newest);
 
     final featured = filtered.where((p) => p.featured == true).toList()
       ..sort((a, b) =>

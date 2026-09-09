@@ -149,6 +149,9 @@ class AmSignUpState extends State<AmSignUp> {
                                 selectedValue:
                                     controller.registrationCountryCont,
                                 countriesList: controller.variantCountries),
+                            12.height,
+                            buildInputField("Registration Number",
+                                controller: controller.registrationNumberCont),
                             24.height,
 
                             // -------- CONTACT DETAILS --------

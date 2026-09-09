@@ -211,7 +211,9 @@ class AmViewAllProductscreenState extends State<AmViewAllProductscreen> {
           products = querySnapshot.docs
               .map((doc) => AmProductModel.fromQuerySnapshot(doc))
               .where((p) => p.status == 'active' || p.status == null)
-              .toList();
+              .toList()
+              ..sort((a, b) =>
+              (a.createdAt ?? DateTime(0)).compareTo(b.createdAt ?? DateTime(0)));;
 
           if (widget.category != null) {
             int? catId = widget.category!.id;

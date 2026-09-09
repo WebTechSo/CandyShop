@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -12,6 +13,7 @@ import 'package:american_sweets/screens/VerifyEmailScreen.dart';
 import 'package:american_sweets/data/repositories/authentication_repository.dart';
 import 'package:american_sweets/data/services/AdminCountryService.dart';
 import 'package:country_state_city/country_state_city.dart' as csc;
+import 'package:http/http.dart' as http;
 
 class SignUpController extends GetxController {
   static SignUpController get instance => Get.find();
@@ -21,6 +23,7 @@ class SignUpController extends GetxController {
   // BUSINESS
   final businessNameCont = TextEditingController();
   final registrationCountryCont = ''.obs;
+  final registrationNumberCont = TextEditingController();
 
   // CONTACT
   final fullNameCont = TextEditingController();
@@ -64,6 +67,87 @@ class SignUpController extends GetxController {
       print('Failed to load variant_countries: $e');
     }
   }
+
+  // Fetch API credentials from Firebase
+  Future<Map<String, String>?> _fetchApiCredentials() async {
+    try {
+      print("📥 Fetching API credentials from Firebase...");
+      
+      final querySnapshot = await _firestore
+          .collection("Organization_Number_Validator")
+          .limit(1)
+          .get();
+
+      if (querySnapshot.docs.isEmpty) {
+        print("❌ No documents found in Organization_Number_Validator collection");
+        return null;
+      }
+
+      final docSnapshot = querySnapshot.docs.first;
+      final data = docSnapshot.data();
+
+      final apiKey = data['api_key'] as String?;
+      final url = data['url'] as String?;
+
+      if (apiKey == null || url == null) {
+        print("❌ API key or URL is missing in Firebase document");
+        return null;
+      }
+
+      print("✅ API credentials fetched successfully");
+      return {
+        'api_key': apiKey,
+        'url': url,
+      };
+    } catch (e) {
+      print("❌ Error fetching API credentials: $e");
+      return null;
+    }
+  }
+
+  Future<bool> isValidOrganizationNumber(String orgNumber) async {
+    final number = orgNumber.trim();
+    if (number.isEmpty) return false;
+
+    // Fetch credentials from Firebase
+    final credentials = await _fetchApiCredentials();
+    if (credentials == null) {
+      print("❌ Failed to fetch API credentials");
+      return false;
+    }
+
+    final apiKey = credentials['api_key']!;
+    final baseUrl = credentials['url']!;
+
+    final uri = Uri.parse('$baseUrl/company/$number');
+    final basicAuth = 'Basic ' +
+        base64Encode(utf8.encode('$apiKey:'));
+
+    try {
+      final response = await http.get(
+        uri,
+        headers: {
+          'Authorization': basicAuth,
+          'Accept': 'application/json',
+        },
+      ).timeout(const Duration(seconds: 20));
+
+      if (response.statusCode != 200) {
+        print('Companies House lookup failed: ${response.statusCode}');
+        return false;
+      }
+
+      final body = jsonDecode(response.body);
+      if (body is! Map<String, dynamic>) return false;
+
+      final companyNumber = body['company_number'];
+      return companyNumber is String && companyNumber.trim().isNotEmpty;
+    } catch (e) {
+      print('Companies House lookup error: $e');
+      return false;
+    }
+  }
+
 
   // TEST FUNCTION
   Future<void> testFirestoreConnection() async {
@@ -115,6 +199,19 @@ class SignUpController extends GetxController {
         return;
       }
 
+      if (registrationNumberCont.text.isEmpty) {
+        Get.snackbar('Registration no Required', 'Please enter organization no');
+        return;
+      }
+
+      final isValidOrgNumber = await isValidOrganizationNumber(registrationNumberCont.text);
+      if (!isValidOrgNumber) {
+        Get.snackbar('Invalid Registration Number',
+            'Please enter a valid organization number');
+        return;
+      }
+
+
       // Start loading
       isLoading.value = true;
 
@@ -138,6 +235,7 @@ class SignUpController extends GetxController {
         'uid': uid,
         'business_name': businessNameCont.text.trim(),
         'registration_country': registrationCountryCont.value,
+        'registration_number': registrationNumberCont.text.trim(),
         'full_name': fullNameCont.text.trim(),
         'email': emailCont.text.trim(),
         'phone': contactNumberCont.text.trim(),

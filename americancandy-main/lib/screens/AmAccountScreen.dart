@@ -574,7 +574,7 @@ class AmAccountScreenState extends State<AmAccountScreen> {
                   getRowItem(sh_lbl_my_order, callback: () {
                     AmOrderListScreen().launch(context);
                   }),
-                  SizedBox(height: spacing_standard_new),
+                 /* SizedBox(height: spacing_standard_new),
                   Observer(
                     builder: (_) => Container(
                       decoration: BoxDecoration(
@@ -596,7 +596,7 @@ class AmAccountScreenState extends State<AmAccountScreen> {
                         ],
                       ),
                     ),
-                  ),
+                  ),*/
                   if (_isLoggedIn) SizedBox(height: spacing_standard_new),
                   if (_isLoggedIn)
                     getRowItem(
