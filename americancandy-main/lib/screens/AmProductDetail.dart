@@ -285,7 +285,9 @@ class AmProductDetailState extends State<AmProductDetail> {
   void _shareProduct() {
     final p = _currentProduct;
     final name = p.name ?? 'Sweet Stop';
-    final price = p.price != null ? '£${p.price!.toStringAsFixed(2)}' : '';
+    final price = FirebaseAuth.instance.currentUser != null && p.price != null
+        ? '£${p.price!.toStringAsFixed(2)}'
+        : '';
     final url = _resolvePrimaryImage(p);
     final text = [name, price, url]
         .where((e) => e != null && e.toString().isNotEmpty)
@@ -509,52 +511,80 @@ class AmProductDetailState extends State<AmProductDetail> {
     );
 
     // --- Price and key details section (moved out of header to avoid overflow) ---
-    var priceSection = Container(
-      padding: EdgeInsets.all(spacing_standard_new),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                '${product.price.validate().toCurrencyFormat()}',
-                style: boldTextStyle(size: 24),
-              ),
-              if (product.sku.validate().isNotEmpty)
-                Text(
-                  'SKU: ${product.sku.validate()}',
-                  style: secondaryTextStyle(size: 14),
+    var priceSection = FirebaseAuth.instance.currentUser != null
+        ? Container(
+            padding: EdgeInsets.all(spacing_standard_new),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      '${product.price.validate().toCurrencyFormat()}',
+                      style: boldTextStyle(size: 24),
+                    ),
+                    if (product.sku.validate().isNotEmpty)
+                      Text(
+                        'SKU: ${product.sku.validate()}',
+                        style: secondaryTextStyle(size: 14),
+                      ),
+                  ],
                 ),
-            ],
-          ),
-          if (product.unitPrice != null && product.unitPrice! > 0)
-            Text(
-              'Unit price: ${product.unitPrice!.toCurrencyFormat()}',
-              style: secondaryTextStyle(size: 14),
-            ).paddingTop(4),
-          if (product.availableQuantity != null)
-            Text(
-              (product.availableQuantity ?? 0) > 0
-                  ? 'Available quantity: ${product.availableQuantity}'
-                  : 'Out of Stock',
-              style: secondaryTextStyle(
-                  size: 14,
-                  color: (product.availableQuantity ?? 0) > 0
-                      ? null
-                      : (appStore.isDarkModeOn
-                      ? Colors.lightGreenAccent.shade400
-                      : Colors.redAccent)),
-            ).paddingTop(2),
-          if (product.priceDescription.validate().isNotEmpty)
-            Text(
-              product.priceDescription.validate(),
-              style: secondaryTextStyle(size: 14),
-            ).paddingTop(4),
-          4.height,
-        ],
-      ),
-    );
+                if (product.unitPrice != null && product.unitPrice! > 0)
+                  Text(
+                    'Unit price: ${product.unitPrice!.toCurrencyFormat()}',
+                    style: secondaryTextStyle(size: 14),
+                  ).paddingTop(4),
+                if (product.availableQuantity != null)
+                  Text(
+                    (product.availableQuantity ?? 0) > 0
+                        ? 'Available quantity: ${product.availableQuantity}'
+                        : 'Out of Stock',
+                    style: secondaryTextStyle(
+                        size: 14,
+                        color: (product.availableQuantity ?? 0) > 0
+                            ? null
+                            : (appStore.isDarkModeOn
+                            ? Colors.lightGreenAccent.shade400
+                            : Colors.redAccent)),
+                  ).paddingTop(2),
+                if (product.priceDescription.validate().isNotEmpty)
+                  Text(
+                    product.priceDescription.validate(),
+                    style: secondaryTextStyle(size: 14),
+                  ).paddingTop(4),
+                4.height,
+              ],
+            ),
+          )
+        : Container(
+            padding: EdgeInsets.all(spacing_standard_new),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (product.sku.validate().isNotEmpty)
+                  Text(
+                    'SKU: ${product.sku.validate()}',
+                    style: secondaryTextStyle(size: 14),
+                  ),
+                if (product.availableQuantity != null)
+                  Text(
+                    (product.availableQuantity ?? 0) > 0
+                        ? 'Available quantity: ${product.availableQuantity}'
+                        : 'Out of Stock',
+                    style: secondaryTextStyle(
+                        size: 14,
+                        color: (product.availableQuantity ?? 0) > 0
+                            ? null
+                            : (appStore.isDarkModeOn
+                            ? Colors.lightGreenAccent.shade400
+                            : Colors.redAccent)),
+                  ).paddingTop(2),
+                4.height,
+              ],
+            ),
+          );
 
     // --- Product Description Section ---
     var descriptionSection = Padding(

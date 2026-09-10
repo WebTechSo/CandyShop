@@ -142,15 +142,16 @@ class AmSearchScreenState extends State<AmSearchScreen> {
                       children: <Widget>[
                         text(list[index].name, textColor: sh_textColorPrimary),
                         SizedBox(height: 4),
-                        Row(
-                          children: <Widget>[
-                            text(
-                                list[index].price.toString().toCurrencyFormat(),
-                                textColor: sh_colorPrimary,
-                                fontFamily: fontMedium,
-                                fontSize: textSizeNormal),
-                          ],
-                        ),
+                        if (FirebaseAuth.instance.currentUser != null)
+                          Row(
+                            children: <Widget>[
+                              text(
+                                  list[index].price.toString().toCurrencyFormat(),
+                                  textColor: sh_colorPrimary,
+                                  fontFamily: fontMedium,
+                                  fontSize: textSizeNormal),
+                            ],
+                          ),
                         SizedBox(
                           height: spacing_standard,
                         ),

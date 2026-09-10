@@ -375,26 +375,27 @@ class _AmProductCardState extends State<AmProductCard> {
                     overflow: TextOverflow.ellipsis,
                   ),
                   const Spacer(),
-                  Builder(builder: (context) {
-                    final bool includeVat =
-                        getBoolAsync('include_vat', defaultValue: true);
-                    final double base = product.price ?? 0.0;
-                    final double rate = (product.vatRate ?? 0.0) / 100.0;
-                    final double shown = includeVat ? base * (1 + rate) : base;
-                    return FittedBox(
-                      fit: BoxFit.scaleDown,
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        shown.toCurrencyFormat(),
-                        maxLines: 1,
-                        style: boldTextStyle(
-                            size: veryCompact ? 14 : 16,
-                            color: appStore.isDarkModeOn
-                                ? sh_gradient_1st
-                                : sh_colorPrimary),
-                      ),
-                    );
-                  }),
+                  if (FirebaseAuth.instance.currentUser != null)
+                    Builder(builder: (context) {
+                      final bool includeVat =
+                          getBoolAsync('include_vat', defaultValue: true);
+                      final double base = product.price ?? 0.0;
+                      final double rate = (product.vatRate ?? 0.0) / 100.0;
+                      final double shown = includeVat ? base * (1 + rate) : base;
+                      return FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          shown.toCurrencyFormat(),
+                          maxLines: 1,
+                          style: boldTextStyle(
+                              size: veryCompact ? 14 : 16,
+                              color: appStore.isDarkModeOn
+                                  ? sh_gradient_1st
+                                  : sh_colorPrimary),
+                        ),
+                      );
+                    }),
                   SizedBox(height: veryCompact ? 2 : 4),
                 ],
               ),

@@ -369,17 +369,18 @@ class AmViewAllProductscreenState extends State<AmViewAllProductscreen> {
                               ),
                             ),
                             6.height,
-                            Builder(builder: (context) {
-                              final double base = p.price ?? 0.0;
-                              final double rate = (p.vatRate ?? 0.0) / 100.0;
-                              final double shown =
-                                  includeVat ? base * (1 + rate) : base;
-                              return Text(
-                                shown.toCurrencyFormat().replaceAll('\$', '£'),
-                                style: boldTextStyle(
-                                    size: 18, color: sh_colorPrimary),
-                              );
-                            }),
+                            if (FirebaseAuth.instance.currentUser != null)
+                              Builder(builder: (context) {
+                                final double base = p.price ?? 0.0;
+                                final double rate = (p.vatRate ?? 0.0) / 100.0;
+                                final double shown =
+                                    includeVat ? base * (1 + rate) : base;
+                                return Text(
+                                  shown.toCurrencyFormat().replaceAll('\$', '£'),
+                                  style: boldTextStyle(
+                                      size: 18, color: sh_colorPrimary),
+                                );
+                              }),
                             6.height,
                             GestureDetector(
                               onTap: () {
