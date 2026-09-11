@@ -681,7 +681,44 @@ class AmProductDetailState extends State<AmProductDetail> {
                         snapshot.data!.docs.isNotEmpty) {
                       var data = snapshot.data!.docs.first.data()
                       as Map<String, dynamic>;
-                      return Text(data['name'] ?? product.category.toString(),
+                      var categoryName = data['name'] ?? product.categoryName.toString();
+                      var parentId = data['parent'];
+                      
+                      // Check if this is a subcategory (has a parent)
+                      if (parentId != null && parentId >= 0) {
+                        // This is a subcategory, fetch parent category name
+                        return FutureBuilder<QuerySnapshot>(
+                          future: FirebaseFirestore.instance
+                              .collection('Categories')
+                              .where('id', isEqualTo: parentId)
+                              .limit(1)
+                              .get(),
+                          builder: (context, parentSnapshot) {
+                            if (parentSnapshot.hasData &&
+                                parentSnapshot.data != null &&
+                                parentSnapshot.data!.docs.isNotEmpty) {
+                              var parentData = parentSnapshot.data!.docs.first.data()
+                              as Map<String, dynamic>;
+                              var parentName = parentData['name'] ?? '';
+                              return Text('$parentName > $categoryName',
+                                  style: primaryTextStyle(
+                                      size: 16,
+                                      color: appStore.isDarkModeOn
+                                          ? white
+                                          : sh_colorPrimary));
+                            }
+                            return Text(categoryName,
+                                style: primaryTextStyle(
+                                    size: 16,
+                                    color: appStore.isDarkModeOn
+                                        ? white
+                                        : sh_colorPrimary));
+                          },
+                        );
+                      }
+                      
+                      // This is a main category, just show the name
+                      return Text(categoryName,
                           style: primaryTextStyle(
                               size: 16,
                               color: appStore.isDarkModeOn
