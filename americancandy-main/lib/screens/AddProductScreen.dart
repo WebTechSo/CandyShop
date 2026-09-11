@@ -31,6 +31,8 @@ class _AddProductScreenState extends State<AddProductScreen> {
   String? _selectedBrand;
   int _currentTab = 3;
   int? _selectedCategory;
+  int _selectedMainCategoryId = 0;
+  int _selectedSubCategoryId = 0;
   List<AmCategory> _categories = [];
 
   final _nameCtrl = TextEditingController();
@@ -132,12 +134,50 @@ class _AddProductScreenState extends State<AddProductScreen> {
               .toList();
           if (_categories.isNotEmpty && _selectedCategory == null) {
             _selectedCategory = _categories.first.id;
+            _initializeCategorySelection();
           }
         });
       }
     } catch (e) {
       print("Error fetching categories: $e");
     }
+  }
+  
+  void _initializeCategorySelection() {
+    if (_selectedCategory == null) {
+      _selectedMainCategoryId = 0;
+      _selectedSubCategoryId = 0;
+      return;
+    }
+    
+    // Check if the selected category is a subcategory
+    final selectedCat = _categories.firstWhere(
+      (c) => c.id == _selectedCategory,
+      orElse: () => _categories.first,
+    );
+    
+    if (selectedCat.parent != null && selectedCat.parent != 0 && selectedCat.parent != -999999) {
+      // The selected category is a subcategory, so set both main and sub
+      _selectedMainCategoryId = selectedCat.parent!;
+      _selectedSubCategoryId = _selectedCategory!;
+    } else {
+      // The selected category is a main category
+      _selectedMainCategoryId = _selectedCategory!;
+      _selectedSubCategoryId = 0;
+    }
+  }
+  
+  List<AmCategory> getMainCategories() {
+    return _categories.where((c) => 
+      c.parent == null || c.parent == 0 || c.parent == -999999
+    ).toList();
+  }
+  
+  List<AmCategory> getSubcategoriesForMainCategory(int mainCategoryId) {
+    if (mainCategoryId == 0 || mainCategoryId == -999999) {
+      return [];
+    }
+    return _categories.where((c) => c.parent == mainCategoryId).toList();
   }
 
   Future<void> _fetchBrands() async {
@@ -235,6 +275,9 @@ class _AddProductScreenState extends State<AddProductScreen> {
   }
 
   Future<void> _saveProduct() async {
+    // Determine the actual category ID based on main and subcategory selection
+    int actualCategoryId = _selectedSubCategoryId > 0 ? _selectedSubCategoryId : _selectedMainCategoryId;
+    
     final newProduct = AmProductModel(
       name: _nameCtrl.text,
       brand: _selectedBrand,
@@ -245,7 +288,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
       unitPrice: double.tryParse(_unitPriceCtrl.text) ?? 0.0,
       vatRate: double.tryParse(_vatRateCtrl.text) ?? 0.0,
       priceDescription: _priceDescCtrl.text,
-      category: _selectedCategory,
+      category: actualCategoryId,
       currency: "GBP",
       thumbnail: _productImages.isNotEmpty ? _productImages.first : '',
       images: _productImages,
@@ -483,15 +526,17 @@ class _AddProductScreenState extends State<AddProductScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            _SectionLabel('Category'),
-                            _DropdownField<int?>(
-                                value: _selectedCategory,
-                                items: _categories.map((e) => e.id).toList(),
-                                itemLabels: _categories
-                                    .map((e) => e.name ?? '')
-                                    .toList(),
-                                onChanged: (v) =>
-                                    setState(() => _selectedCategory = v)),
+                            _SectionLabel('Main Category'),
+                            _DropdownField<int>(
+                                value: _selectedMainCategoryId,
+                                items: [0, ...getMainCategories().map((e) => e.id ?? 0)],
+                                itemLabels: ['None', ...getMainCategories().map((e) => e.name ?? 'Unknown')],
+                                onChanged: (v) {
+                                  setState(() {
+                                    _selectedMainCategoryId = v!;
+                                    _selectedSubCategoryId = 0; // Reset subcategory when main changes
+                                  });
+                                }),
                           ],
                         ),
                       ),
@@ -515,6 +560,22 @@ class _AddProductScreenState extends State<AddProductScreen> {
                         ),
                       ),
                     ]),
+                    12.height,
+                    // Show subcategory dropdown only if main category has subcategories
+                    if (_selectedMainCategoryId > 0 && _selectedMainCategoryId != -999999)
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _SectionLabel('Sub Category (Optional)'),
+                          _DropdownField<int>(
+                            value: _selectedSubCategoryId,
+                            items: [0, ...getSubcategoriesForMainCategory(_selectedMainCategoryId).map((c) => c.id ?? 0)],
+                            itemLabels: ['None', ...getSubcategoriesForMainCategory(_selectedMainCategoryId).map((c) => c.name ?? 'Unknown')],
+                            onChanged: (v) => setState(() => _selectedSubCategoryId = v!),
+                          ),
+                          12.height,
+                        ],
+                      ),
                     12.height,
                     Row(children: [
                       Expanded(

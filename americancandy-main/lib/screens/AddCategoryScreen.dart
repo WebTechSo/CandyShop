@@ -39,6 +39,8 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
   bool _isSelected = false;
   bool _isSlugEdited = false;
   int _selectedParentId = 0;
+  int _selectedMainCategoryId = 0;
+  int _selectedSubCategoryId = 0;
   List<AmCategory> categoryList = [];
 
   final ImagePicker _picker = ImagePicker();
@@ -67,7 +69,41 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
       _isSelected = widget.category!.isSelected ?? false;
       _isSlugEdited =
       true; // Don't auto-update slug when editing existing category
+      
+      // Set main category and subcategory based on parent
+      _initializeCategorySelection();
     }
+  }
+  
+  void _initializeCategorySelection() {
+    if (_selectedParentId == 0 || _selectedParentId == -999999) {
+      _selectedMainCategoryId = 0;
+      _selectedSubCategoryId = 0;
+      return;
+    }
+    
+    // Check if the selected parent is a subcategory
+    final parentCategory = categoryList.firstWhere(
+      (c) => c.id == _selectedParentId,
+      orElse: () => categoryList.first,
+    );
+    
+    if (parentCategory.parent != null && parentCategory.parent != 0 && parentCategory.parent != -999999) {
+      // The selected parent is a subcategory, so set both main and sub
+      _selectedMainCategoryId = parentCategory.parent!;
+      _selectedSubCategoryId = _selectedParentId;
+    } else {
+      // The selected parent is a main category
+      _selectedMainCategoryId = _selectedParentId;
+      _selectedSubCategoryId = 0;
+    }
+  }
+  
+  List<AmCategory> getSubcategoriesForMainCategory(int mainCategoryId) {
+    if (mainCategoryId == 0 || mainCategoryId == -999999) {
+      return [];
+    }
+    return categoryList.where((c) => c.parent == mainCategoryId).toList();
   }
 
   Future<void> _resolveGsUrl(String gsUrl) async {
@@ -148,6 +184,9 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
   Future<void> _saveCategory() async {
     if (!_formKey.currentState!.validate()) return;
 
+    // Determine the actual parent ID based on main and subcategory selection
+    int actualParentId = _selectedSubCategoryId > 0 ? _selectedSubCategoryId : _selectedMainCategoryId;
+
     final newCategory = AmCategory(
       count: 0,
       description: _descCtrl.text,
@@ -155,7 +194,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
       isSelected: _isSelected,
       menuOrder: int.tryParse(_menuOrderCtrl.text) ?? 0,
       name: _nameCtrl.text,
-      parent: _selectedParentId,
+      parent: actualParentId,
       slug: _slugCtrl.text.isEmpty
           ? _nameCtrl.text.toLowerCase().replaceAll(' ', '-')
           : _slugCtrl.text,
@@ -261,6 +300,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
     parentNames.add('Root');
     parentImages.add(null);
 
+    // Only add main categories (parent == null, 0, or -999999)
     for (var c in categoryList) {
       final id = c.id;
 
@@ -268,6 +308,9 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
       if (id == null) continue;
       // Skip duplicate IDs
       if (addedIds.contains(id)) continue;
+      // Only add main categories (not subcategories)
+      if (c.parent != null && c.parent != 0 && c.parent != rootId) continue;
+      
       addedIds.add(id);
       parentIds.add(id);
       parentNames.add(c.name ?? 'Unknown');
@@ -381,16 +424,36 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
                           hint: 'Describe the category...',
                           maxLines: 3),
                       12.height,
-                      _SectionLabel('Parent Category'),
+                      _SectionLabel('Main Category'),
                       _DropdownField<int>(
-                        value: _selectedParentId,
+                        value: _selectedMainCategoryId,
                         items: parentIds,
                         itemLabels: parentNames,
                         itemImages: parentImages,
-                        onChanged: (v) =>
-                            setState(() => _selectedParentId = v!),
+                        onChanged: (v) {
+                          setState(() {
+                            _selectedMainCategoryId = v!;
+                            _selectedSubCategoryId = 0; // Reset subcategory when main changes
+                          });
+                        },
                       ),
                       12.height,
+                      // Show subcategory dropdown only if main category has subcategories
+                      if (_selectedMainCategoryId > 0 && _selectedMainCategoryId != -999999)
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _SectionLabel('Sub Category (Optional)'),
+                            _DropdownField<int>(
+                              value: _selectedSubCategoryId,
+                              items: [0, ...getSubcategoriesForMainCategory(_selectedMainCategoryId).map((c) => c.id ?? 0)],
+                              itemLabels: ['None', ...getSubcategoriesForMainCategory(_selectedMainCategoryId).map((c) => c.name ?? 'Unknown')],
+                              itemImages: [null, ...getSubcategoriesForMainCategory(_selectedMainCategoryId).map((c) => c.image)],
+                              onChanged: (v) => setState(() => _selectedSubCategoryId = v!),
+                            ),
+                            12.height,
+                          ],
+                        ),
                       _SectionLabel('Menu Order'),
                       _InputField(controller: _menuOrderCtrl, hint: '0'),
                       12.height,

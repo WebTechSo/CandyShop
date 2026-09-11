@@ -209,6 +209,7 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
                           _updateExpansionState(_categoryTree, cat.docId!, !isExpanded);
                         });
                       },
+                      tooltip: isExpanded ? 'Collapse subcategories' : 'Expand subcategories',
                     ),
                   ),
                 if (!hasChildren && isSubcategory)
@@ -234,7 +235,7 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
             ),
             subtitle: isSubcategory 
                 ? Text('Subcategory of ID: ${node.category.parent}', style: secondaryTextStyle(size: 12, color: Colors.grey[600]))
-                : Text('ID: ${cat.id}${hasChildren ? ' • ${node.children.length} subcategories' : ''}', style: secondaryTextStyle(size: 12)),
+                : Text('ID: ${cat.id}${hasChildren ? ' • ${node.children.length} subcategories • Tap ↓ to expand' : ''}', style: secondaryTextStyle(size: 12)),
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [

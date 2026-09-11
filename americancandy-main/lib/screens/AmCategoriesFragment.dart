@@ -378,17 +378,9 @@ class _AmCategoriesFragmentState extends State<AmCategoriesFragment> {
           ),
           child: InkWell(
             onTap: () {
-              if (hasChildren) {
-                print('Toggling category: ${cat.name}, current state: $isExpanded');
-                setState(() {
-                  _expandedState[cat.docId!] = !isExpanded;
-                  _updateExpansionState(_categoryTree, cat.docId!, !isExpanded);
-                  print('New expansion state: ${_expandedState[cat.docId]}');
-                });
-              } else {
-                AmViewAllProductscreen(category: cat, title: cat.name)
-                    .launch(context);
-              }
+              // Always navigate to products when clicking the category card
+              AmViewAllProductscreen(category: cat, title: cat.name)
+                  .launch(context);
             },
             child: Container(
               constraints: BoxConstraints(
@@ -422,18 +414,28 @@ class _AmCategoriesFragmentState extends State<AmCategoriesFragment> {
                           borderRadius: BorderRadius.circular(2),
                         ),
                       ),
-                    // Expand/collapse icon for categories with subcategories
+                    // Expand/collapse button for categories with subcategories
                     if (hasChildren)
-                      Container(
-                        padding: EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Icon(
-                          isExpanded ? Icons.expand_less : Icons.expand_more,
-                          color: white,
-                          size: 20,
+                      GestureDetector(
+                        onTap: () {
+                          print('Toggling category: ${cat.name}, current state: $isExpanded');
+                          setState(() {
+                            _expandedState[cat.docId!] = !isExpanded;
+                            _updateExpansionState(_categoryTree, cat.docId!, !isExpanded);
+                            print('New expansion state: ${_expandedState[cat.docId]}');
+                          });
+                        },
+                        child: Container(
+                          padding: EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.2),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Icon(
+                            isExpanded ? Icons.expand_less : Icons.expand_more,
+                            color: white,
+                            size: 20,
+                          ),
                         ),
                       ),
                     Expanded(
@@ -453,7 +455,7 @@ class _AmCategoriesFragmentState extends State<AmCategoriesFragment> {
                             ),
                             if (hasChildren)
                               Text(
-                                '${node.children.length} subcategories',
+                                '${node.children.length} subcategories • Tap ↓ to expand',
                                 style: secondaryTextStyle(
                                     color: white.withValues(alpha: 0.8),
                                     size: 11),
