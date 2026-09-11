@@ -439,7 +439,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
                       ),
                       12.height,
                       // Show subcategory dropdown only if main category has subcategories
-                      if (_selectedMainCategoryId > 0 && _selectedMainCategoryId != -999999)
+                      if (_selectedMainCategoryId > 0 && _selectedMainCategoryId != -999999 && getSubcategoriesForMainCategory(_selectedMainCategoryId).isNotEmpty)
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [

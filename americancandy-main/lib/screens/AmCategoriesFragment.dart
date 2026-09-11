@@ -372,6 +372,15 @@ class _AmCategoriesFragmentState extends State<AmCategoriesFragment> {
 
         final isSubcategory = node.level > 0;
         
+        // Use matching theme colors for subcategories
+        final Gradient subcategoryBg = LinearGradient(
+          colors: isSubcategory 
+              ? [sh_cat_2.withValues(alpha: 0.7), sh_cat_1.withValues(alpha: 0.7)]
+              : bg.colors,
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+        );
+        
         return Container(
           margin: EdgeInsets.only(
             left: isSubcategory ? 32.0 : 0.0, // More prominent indentation for subcategories
@@ -384,19 +393,16 @@ class _AmCategoriesFragmentState extends State<AmCategoriesFragment> {
             },
             child: Container(
               constraints: BoxConstraints(
-                minHeight: isSubcategory ? 80 : 110, // Smaller height for subcategories
+                minHeight: isSubcategory ? 90 : 110, // Slightly taller for subcategories
               ),
               decoration: BoxDecoration(
-                gradient: isSubcategory 
-                    ? LinearGradient(
-                        colors: [Colors.grey[400]!, Colors.grey[500]!],
-                        begin: Alignment.centerLeft,
-                        end: Alignment.centerRight,
-                      )
-                    : bg,
+                gradient: isSubcategory ? subcategoryBg : bg,
                 borderRadius: BorderRadius.circular(16),
                 border: isSubcategory 
-                    ? Border.all(color: Colors.grey[600]!, width: 1) 
+                    ? Border.all(color: sh_colorPrimary.withValues(alpha: 0.3), width: 1.5) 
+                    : null,
+                boxShadow: isSubcategory 
+                    ? defaultBoxShadow(shadowColor: appShadowColor)
                     : null,
               ),
               child: IntrinsicHeight(
@@ -449,8 +455,8 @@ class _AmCategoriesFragmentState extends State<AmCategoriesFragment> {
                               cat.name ?? '',
                               style: boldTextStyle(
                                   color: white, 
-                                  size: isSubcategory ? 14 : 18,
-                                  weight: isSubcategory ? FontWeight.w500 : FontWeight.w700),
+                                  size: isSubcategory ? 16 : 18,
+                                  weight: isSubcategory ? FontWeight.w600 : FontWeight.w700),
                               softWrap: true,
                             ),
                             if (hasChildren)
@@ -462,10 +468,10 @@ class _AmCategoriesFragmentState extends State<AmCategoriesFragment> {
                               ),
                             if (isSubcategory)
                               Text(
-                                '↳ Subcategory',
+                                'Subcategory',
                                 style: secondaryTextStyle(
-                                    color: white.withValues(alpha: 0.6),
-                                    size: 10),
+                                    color: white.withValues(alpha: 0.7),
+                                    size: 12),
                               ),
                           ],
                         ),
@@ -478,9 +484,9 @@ class _AmCategoriesFragmentState extends State<AmCategoriesFragment> {
                         bottomRight: Radius.circular(16),
                       ),
                       child: Container(
-                        width: isSubcategory ? 120 : 160, // Smaller image for subcategories
+                        width: isSubcategory ? 140 : 160, // Slightly smaller image for subcategories
                         height: double.infinity,
-                        color: Colors.white.withValues(alpha: isSubcategory ? 0.1 : 0.15),
+                        color: Colors.white.withValues(alpha: isSubcategory ? 0.2 : 0.15),
                         child: _CategoryImage(src: cat.image),
                       ),
                     ),
