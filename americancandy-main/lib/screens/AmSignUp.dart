@@ -152,6 +152,9 @@ class AmSignUpState extends State<AmSignUp> {
                             12.height,
                             buildInputField("Registration Number",
                                 controller: controller.registrationNumberCont),
+                            12.height,
+                            buildInputField("Optional VAT Number",
+                                controller: controller.vatNumberCont),
                             24.height,
 
                             // -------- CONTACT DETAILS --------
@@ -450,9 +453,11 @@ class AmSignUpState extends State<AmSignUp> {
     return Obx(() {
       final items = countriesList?.toList() ?? <String>[];
       return DropdownButtonFormField<String>(
+        isExpanded: true,
+        isDense: true,
         decoration: InputDecoration(
           hintText: label,
-          contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+          contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide(color: Colors.grey.shade300, width: 1),
@@ -470,7 +475,11 @@ class AmSignUpState extends State<AmSignUp> {
         items: items.map((String value) {
           return DropdownMenuItem<String>(
             value: value,
-            child: Text(value),
+            child: Text(
+              value,
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
+            ),
           );
         }).toList(),
         onChanged: onChanged,

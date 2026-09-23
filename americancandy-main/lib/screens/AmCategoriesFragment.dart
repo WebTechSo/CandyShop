@@ -61,7 +61,7 @@ class _AmCategoriesFragmentState extends State<AmCategoriesFragment> {
       if (aStarts != bStarts) return aStarts ? -1 : 1;
       return an.compareTo(bn);
     });
-    return list.take(5).toList();
+    return list;
   }
 
   Future<void> _ensureProductsLoaded() async {

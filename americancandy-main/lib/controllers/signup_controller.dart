@@ -24,6 +24,7 @@ class SignUpController extends GetxController {
   final businessNameCont = TextEditingController();
   final registrationCountryCont = ''.obs;
   final registrationNumberCont = TextEditingController();
+  final vatNumberCont = TextEditingController();
 
   // CONTACT
   final fullNameCont = TextEditingController();
@@ -245,6 +246,7 @@ class SignUpController extends GetxController {
         'business_name': businessNameCont.text.trim(),
         'registration_country': registrationCountryCont.value,
         'registration_number': registrationNumberCont.text.trim(),
+        'vat_number': vatNumberCont.text.trim(),
         'full_name': fullNameCont.text.trim(),
         'email': emailCont.text.trim(),
         'phone': contactNumberCont.text.trim(),
@@ -401,6 +403,8 @@ class SignUpController extends GetxController {
   void clearForm() {
     businessNameCont.clear();
     registrationCountryCont.value = '';
+    registrationNumberCont.clear();
+    vatNumberCont.clear();
     fullNameCont.clear();
     emailCont.clear();
     contactNumberCont.clear();
@@ -415,6 +419,8 @@ class SignUpController extends GetxController {
   @override
   void onClose() {
     businessNameCont.dispose();
+    registrationNumberCont.dispose();
+    vatNumberCont.dispose();
     fullNameCont.dispose();
     emailCont.dispose();
     contactNumberCont.dispose();

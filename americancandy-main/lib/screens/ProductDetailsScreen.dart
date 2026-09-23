@@ -35,6 +35,8 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
   List<AmCategory> _categories = [];
   List<String> _brands = [];
   String? _selectedBrand;
+  int _selectedMainCategoryId = 0;
+  int _selectedSubCategoryId = 0;
 
   late final TextEditingController _nameCtrl;
   late final TextEditingController _brandCtrl;
@@ -85,6 +87,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
 
     _selectedCategory = widget.product.category ?? 18;
     _selectedBrand = widget.product.brand;
+    _initializeCategorySelection();
 
     _productImages = List.from(widget.product.images ?? []);
 
@@ -111,11 +114,49 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
           if (_categories.isNotEmpty && !_categories.any((e) => e.id == _selectedCategory)) {
             _selectedCategory = _categories.first.id!;
           }
+          _initializeCategorySelection();
         });
       }
     } catch (e) {
       print('Error loading categories: $e');
     }
+  }
+
+  void _initializeCategorySelection() {
+    if (_selectedCategory == 0 || _categories.isEmpty) {
+      _selectedMainCategoryId = 0;
+      _selectedSubCategoryId = 0;
+      return;
+    }
+    
+    // Check if the selected category is a subcategory
+    final selectedCat = _categories.firstWhere(
+      (c) => c.id == _selectedCategory,
+      orElse: () => _categories.first,
+    );
+    
+    if (selectedCat.parent != null && selectedCat.parent != 0 && selectedCat.parent != -999999) {
+      // The selected category is a subcategory, so set both main and sub
+      _selectedMainCategoryId = selectedCat.parent!;
+      _selectedSubCategoryId = _selectedCategory!;
+    } else {
+      // The selected category is a main category
+      _selectedMainCategoryId = _selectedCategory!;
+      _selectedSubCategoryId = 0;
+    }
+  }
+  
+  List<AmCategory> getMainCategories() {
+    return _categories.where((c) => 
+      c.parent == null || c.parent == 0 || c.parent == -999999
+    ).toList();
+  }
+  
+  List<AmCategory> getSubcategoriesForMainCategory(int mainCategoryId) {
+    if (mainCategoryId == 0 || mainCategoryId == -999999) {
+      return [];
+    }
+    return _categories.where((c) => c.parent == mainCategoryId).toList();
   }
 
   Future<void> _loadBrands() async {
@@ -189,6 +230,9 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
   }
 
   Future<void> _saveProduct() async {
+    // Determine the actual category ID based on main and subcategory selection
+    int actualCategoryId = _selectedSubCategoryId > 0 ? _selectedSubCategoryId : _selectedMainCategoryId;
+    
     final updatedProduct = AmProductModel(
       id: widget.product.id,
       name: _nameCtrl.text,
@@ -200,7 +244,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
       unitPrice: double.tryParse(_unitPriceCtrl.text) ?? 0.0,
       vatRate: double.tryParse(_vatRateCtrl.text) ?? 0.0,
       priceDescription: _priceDescCtrl.text,
-      category: _selectedCategory,
+      category: actualCategoryId,
       currency: widget.product.currency ?? "GBP",
       thumbnail: _productImages.isNotEmpty ? _productImages.first : '',
       images: _productImages,
@@ -501,17 +545,17 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                           child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                _SectionLabel('Category'),
+                                _SectionLabel('Main Category'),
                                 _DropdownField<int>(
-                                    value: _selectedCategory,
-                                    items: _categories
-                                        .map((e) => e.id!)
-                                        .toList(),
-                                    itemLabels: _categories
-                                        .map((e) => e.name!)
-                                        .toList(),
-                                    onChanged: (v) =>
-                                        setState(() => _selectedCategory = v!)),
+                                    value: _selectedMainCategoryId,
+                                    items: [0, ...getMainCategories().map((e) => e.id ?? 0)],
+                                    itemLabels: ['None', ...getMainCategories().map((e) => e.name ?? 'Unknown')],
+                                    onChanged: (v) {
+                                      setState(() {
+                                        _selectedMainCategoryId = v!;
+                                        _selectedSubCategoryId = 0; // Reset subcategory when main changes
+                                      });
+                                    }),
                               ]),
                         ),
                         12.width,
@@ -528,6 +572,22 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                               ]),
                         ),
                       ]),
+                      12.height,
+                      // Show subcategory dropdown only if main category has subcategories
+                      if (_selectedMainCategoryId > 0 && _selectedMainCategoryId != -999999 && getSubcategoriesForMainCategory(_selectedMainCategoryId).isNotEmpty)
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _SectionLabel('Sub Category (Optional)'),
+                            _DropdownField<int>(
+                              value: _selectedSubCategoryId,
+                              items: [0, ...getSubcategoriesForMainCategory(_selectedMainCategoryId).map((c) => c.id ?? 0)],
+                              itemLabels: ['None', ...getSubcategoriesForMainCategory(_selectedMainCategoryId).map((c) => c.name ?? 'Unknown')],
+                              onChanged: (v) => setState(() => _selectedSubCategoryId = v!),
+                            ),
+                            12.height,
+                          ],
+                        ),
                       12.height,
                       Row(children: [
                         Expanded(

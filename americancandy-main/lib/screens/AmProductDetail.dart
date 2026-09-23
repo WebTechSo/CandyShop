@@ -660,12 +660,15 @@ class AmProductDetailState extends State<AmProductDetail> {
     var categoryAndBrandSection = Padding(
       padding: EdgeInsets.symmetric(
           horizontal: spacing_standard_new, vertical: spacing_control),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Wrap(
+        alignment: WrapAlignment.start,
+        spacing: 16,
+        runSpacing: 8,
         children: [
-          // Category (Left)
+          // Category
           if (product.category != null)
             Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Text("Category: ", style: boldTextStyle(size: 16)),
                 4.width,
@@ -736,9 +739,10 @@ class AmProductDetailState extends State<AmProductDetail> {
               ],
             ),
 
-          // Brand (Right)
+          // Brand
           if (product.brand != null && product.brand!.isNotEmpty)
             Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Text("Brand: ", style: boldTextStyle(size: 16)),
                 4.width,
