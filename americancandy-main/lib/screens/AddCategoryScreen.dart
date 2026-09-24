@@ -38,8 +38,8 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
   final _menuOrderCtrl = TextEditingController(text: '0');
   bool _isSelected = false;
   bool _isSlugEdited = false;
-  int _selectedParentId = 0;
-  int _selectedMainCategoryId = 0;
+  int _selectedParentId = -999999;
+  int _selectedMainCategoryId = -999999;
   int _selectedSubCategoryId = 0;
   List<AmCategory> categoryList = [];
 
@@ -77,7 +77,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
   
   void _initializeCategorySelection() {
     if (_selectedParentId == 0 || _selectedParentId == -999999) {
-      _selectedMainCategoryId = 0;
+      _selectedMainCategoryId = -999999;
       _selectedSubCategoryId = 0;
       return;
     }
@@ -100,7 +100,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
   }
   
   List<AmCategory> getSubcategoriesForMainCategory(int mainCategoryId) {
-    if (mainCategoryId == 0 || mainCategoryId == -999999) {
+    if (mainCategoryId == -999999) {
       return [];
     }
     return categoryList.where((c) => c.parent == mainCategoryId).toList();
@@ -320,6 +320,10 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
     if (parentIds.where((e) => e == _selectedParentId).length != 1) {
       _selectedParentId = rootId;
     }
+    
+    if (parentIds.where((e) => e == _selectedMainCategoryId).length != 1) {
+      _selectedMainCategoryId = rootId;
+    }
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
@@ -436,10 +440,11 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
                             _selectedSubCategoryId = 0; // Reset subcategory when main changes
                           });
                         },
+                        hint: Text('Select Main Category'),
                       ),
                       12.height,
                       // Show subcategory dropdown only if main category has subcategories
-                      if (_selectedMainCategoryId > 0 && _selectedMainCategoryId != -999999 && getSubcategoriesForMainCategory(_selectedMainCategoryId).isNotEmpty)
+                      if (_selectedMainCategoryId > 0 && getSubcategoriesForMainCategory(_selectedMainCategoryId).isNotEmpty)
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -653,19 +658,25 @@ class _DropdownField<T> extends StatelessWidget {
   final List<String>? itemLabels;
   final List<String?>? itemImages;
   final ValueChanged<T?> onChanged;
+  final Widget? hint;
   const _DropdownField(
       {Key? key,
       required this.value,
       required this.items,
       this.itemLabels,
       this.itemImages,
-      required this.onChanged})
+      required this.onChanged,
+      this.hint})
       : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    // Only set value if it exists in items
+    final validValue = items.contains(value) ? value : null;
+    
     return DropdownButtonFormField<T>(
-      value: value,
+      value: validValue,
+      hint: hint,
       items: List.generate(items.length, (index) {
         return DropdownMenuItem<T>(
           value: items[index],

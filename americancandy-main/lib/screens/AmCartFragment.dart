@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:american_sweets/main.dart';
 import 'package:american_sweets/models/AmProduct.dart';
@@ -30,6 +31,7 @@ class AmCartFragment extends StatefulWidget {
 class AmCartFragmentState extends State<AmCartFragment> {
   bool includeVat = getBoolAsync('include_vat', defaultValue: true);
   bool _navigating = false;
+  final Map<String, bool> _isHovered = {}; // Track hover state for each item
 
   @override
   void initState() {
@@ -44,6 +46,11 @@ class AmCartFragmentState extends State<AmCartFragment> {
 
   void removeItem(String productId) {
     CartService().removeFromCart(productId);
+    toast("Item removed from cart");
+    
+    // Vibrate on remove - try multiple methods for better compatibility
+    HapticFeedback.vibrate();
+    HapticFeedback.heavyImpact();
   }
 
   @override
@@ -54,6 +61,7 @@ class AmCartFragmentState extends State<AmCartFragment> {
   @override
   Widget build(BuildContext context) {
     var width = MediaQuery.of(context).size.width;
+    var height = MediaQuery.of(context).size.height;
 
     // Calculate the height of bottom navigation bar (typical height is 56-70)
     double bottomNavBarHeight = kBottomNavigationBarHeight;
@@ -149,216 +157,251 @@ class AmCartFragmentState extends State<AmCartFragment> {
               final cartProduct = cartList[index];
               final product = cartProduct.product;
 
-              return Container(
-                color: context.cardColor,
-                margin: EdgeInsets.only(
-                  left: spacing_standard_new,
-                  right: spacing_standard_new,
-                  top: spacing_standard_new,
-                ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      width: width * 0.25,
-                      height: width * 0.25,
-                      margin: EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(12), // rectangle with rounded corners
-                        border: Border.all(color: sh_view_color, width: 1),
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(12), // must match the Container's radius
-                        child: (product.thumbnail != null && product.thumbnail!.isNotEmpty)
-                            ? (product.thumbnail!.startsWith('http')
-                            ? Image.network(
-                          product.thumbnail!,
-                          fit: BoxFit.cover,
-                          width: double.infinity,
-                          height: double.infinity,
-                          errorBuilder: (context, error, stackTrace) => Container(
+              return MouseRegion(
+                onEnter: (_) {
+                  setState(() {
+                    _isHovered[product.id ?? ''] = true;
+                  });
+                },
+                onExit: (_) {
+                  setState(() {
+                    _isHovered[product.id ?? ''] = false;
+                  });
+                },
+                child: Container(
+                  margin: EdgeInsets.only(
+                    left: spacing_standard_new,
+                    right: spacing_standard_new,
+                    top: spacing_standard_new,
+                  ),
+                  decoration: BoxDecoration(
+                    color: _isHovered[product.id ?? ''] == true 
+                        ? context.cardColor.withValues(alpha: 0.9)
+                        : context.cardColor,
+                    border: Border.all(
+                      color: _isHovered[product.id ?? ''] == true 
+                          ? sh_colorPrimary.withValues(alpha: 0.3)
+                          : Colors.transparent,
+                      width: 1,
+                    ),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        width: width * 0.25,
+                        height: width * 0.25,
+                        margin: EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12), // rectangle with rounded corners
+                          border: Border.all(color: sh_view_color, width: 1),
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(12), // must match the Container's radius
+                          child: (product.thumbnail != null && product.thumbnail!.isNotEmpty)
+                              ? (product.thumbnail!.startsWith('http')
+                              ? Image.network(
+                            product.thumbnail!,
+                            fit: BoxFit.cover,
+                            width: double.infinity,
+                            height: double.infinity,
+                            errorBuilder: (context, error, stackTrace) => Container(
+                              color: sh_view_color,
+                              alignment: Alignment.center,
+                              child: Icon(Icons.image_not_supported),
+                            ),
+                          )
+                              : Image.asset(
+                            "images/sweets/img/products" + product.thumbnail!,
+                            fit: BoxFit.cover,
+                            width: double.infinity,
+                            height: double.infinity,
+                            errorBuilder: (context, error, stackTrace) => Container(
+                              color: sh_view_color,
+                              alignment: Alignment.center,
+                              child: Icon(Icons.image_not_supported),
+                            ),
+                          ))
+                              : Container(
                             color: sh_view_color,
                             alignment: Alignment.center,
                             child: Icon(Icons.image_not_supported),
                           ),
-                        )
-                            : Image.asset(
-                          "images/sweets/img/products" + product.thumbnail!,
-                          fit: BoxFit.cover,
-                          width: double.infinity,
-                          height: double.infinity,
-                          errorBuilder: (context, error, stackTrace) => Container(
-                            color: sh_view_color,
-                            alignment: Alignment.center,
-                            child: Icon(Icons.image_not_supported),
-                          ),
-                        ))
-                            : Container(
-                          color: sh_view_color,
-                          alignment: Alignment.center,
-                          child: Icon(Icons.image_not_supported),
                         ),
                       ),
-                    ),
-                    Expanded(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              8.height,
-                              Text(product.name.toString(),
-                                      style: boldTextStyle())
-                                  .paddingOnly(left: 8),
-                              8.height,
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    "Size: ${product.variants?.size ?? "N/A"} | Flavor: ${product.variants?.flavor ?? "N/A"}",
-                                    style: boldTextStyle(size: 14),
-                                  ),
-                                  8.height,
-                                  Container(
-                                    decoration: BoxDecoration(
-                                      border: Border.all(
-                                          color: sh_view_color, width: 1),
-                                      borderRadius: BorderRadius.circular(8),
+                      Expanded(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                8.height,
+                                Text(product.name.toString(),
+                                        style: boldTextStyle())
+                                    .paddingOnly(left: 8),
+                                8.height,
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      "Size: ${product.variants?.size ?? "N/A"} | Flavor: ${product.variants?.flavor ?? "N/A"}",
+                                      style: boldTextStyle(size: 14),
                                     ),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        IconButton(
-                                          icon: Icon(Icons.remove,
-                                              size: 16,
+                                    8.height,
+                                    Container(
+                                      decoration: BoxDecoration(
+                                        border: Border.all(
+                                            color: sh_view_color, width: 1),
+                                        borderRadius: BorderRadius.circular(8),
+                                        color: _isHovered[product.id ?? ''] == true 
+                                            ? sh_colorPrimary.withValues(alpha: 0.1)
+                                            : Colors.transparent,
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          IconButton(
+                                            icon: Icon(Icons.remove,
+                                                size: 16,
+                                                color: appStore.isDarkModeOn
+                                                    ? white
+                                                    : sh_textColorPrimary),
+                                            onPressed: () {
+                                              updateQuantity(product.id!,
+                                                  cartProduct.quantity - 1);
+                                            },
+                                            padding: EdgeInsets.zero,
+                                            constraints: BoxConstraints(
+                                                minWidth: 32, minHeight: 32),
+                                          ),
+                                          Text("${cartProduct.quantity}",
+                                              style: primaryTextStyle()),
+                                          IconButton(
+                                            icon: Icon(Icons.add,
+                                                size: 16,
+                                                color: appStore.isDarkModeOn
+                                                    ? white
+                                                    : sh_textColorPrimary),
+                                            onPressed: () {
+                                              updateQuantity(product.id!,
+                                                  cartProduct.quantity + 1);
+                                            },
+                                            padding: EdgeInsets.zero,
+                                            constraints: BoxConstraints(
+                                                minWidth: 32, minHeight: 32),
+                                          ),
+                                        ],
+                                      ),
+                                    )
+                                  ],
+                                ).paddingOnly(left: 8.0, top: spacing_control),
+                                12.height,
+                                Align(
+                                  alignment: Alignment.centerRight,
+                                  child: Padding(
+                                    padding: EdgeInsets.only(right: 16),
+                                    child: Text(
+                                      _calculateProductPrice(
+                                          product, cartProduct.quantity),
+                                      style:
+                                          boldTextStyle(
                                               color: appStore.isDarkModeOn
-                                                  ? white
-                                                  : sh_textColorPrimary),
-                                          onPressed: () {
-                                            updateQuantity(product.id!,
-                                                cartProduct.quantity - 1);
-                                          },
-                                          padding: EdgeInsets.zero,
-                                          constraints: BoxConstraints(
-                                              minWidth: 32, minHeight: 32),
-                                        ),
-                                        Text("${cartProduct.quantity}",
-                                            style: primaryTextStyle()),
-                                        IconButton(
-                                          icon: Icon(Icons.add,
-                                              size: 16,
-                                              color: appStore.isDarkModeOn
-                                                  ? white
-                                                  : sh_textColorPrimary),
-                                          onPressed: () {
-                                            updateQuantity(product.id!,
-                                                cartProduct.quantity + 1);
-                                          },
-                                          padding: EdgeInsets.zero,
-                                          constraints: BoxConstraints(
-                                              minWidth: 32, minHeight: 32),
-                                        ),
-                                      ],
+                                                  ? sh_gradient_1st
+                                                  : sh_colorPrimary),
                                     ),
-                                  )
-                                ],
-                              ).paddingOnly(left: 8.0, top: spacing_control),
-                              12.height,
-                              Align(
-                                alignment: Alignment.centerRight,
-                                child: Padding(
-                                  padding: EdgeInsets.only(right: 16),
-                                  child: Text(
-                                    _calculateProductPrice(
-                                        product, cartProduct.quantity),
-                                    style:
-                                        boldTextStyle(
-                                            color: appStore.isDarkModeOn
-                                                ? sh_gradient_1st
-                                                : sh_colorPrimary),
                                   ),
                                 ),
-                              ),
-                            ],
-                          ),
-                          Divider(height: 1),
-                          SizedBox(
-                            height: 40,
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                if (AuthenticationRepository
-                                        .instance.currentUser !=
-                                    null) ...[
+                              ],
+                            ),
+                            Divider(height: 1),
+                            SizedBox(
+                              height: 40,
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  if (AuthenticationRepository
+                                          .instance.currentUser !=
+                                      null) ...[
+                                    Expanded(
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Icon(
+                                            Icons.bookmark_border,
+                                            color: appStore.isDarkModeOn
+                                                ? gray
+                                                : sh_textColorPrimary,
+                                            size: 16,
+                                          ),
+                                          4.width,
+                                          Flexible(
+                                            child: Text(
+                                              "Save for later",
+                                              style: secondaryTextStyle(),
+                                              overflow: TextOverflow.ellipsis,
+                                              maxLines: 1,
+                                            ),
+                                          ),
+                                        ],
+                                      ).onTap(() async {
+                                        if (product.id != null) {
+                                          try {
+                                            await WishlistService()
+                                                .addToWishlist(product.id!);
+                                            await CartService()
+                                                .removeFromCart(product.id!);
+                                            toast("Item saved for later");
+                                            // Vibrate - try multiple methods for better compatibility
+                                            HapticFeedback.vibrate();
+                                            HapticFeedback.heavyImpact();
+                                          } catch (e) {
+                                            toast("Failed to save item");
+                                          }
+                                        }
+                                      }),
+                                    ),
+                                    Container(
+                                        width: 1,
+                                        color: sh_view_color,
+                                        height: 35),
+                                  ],
                                   Expanded(
                                     child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
+                                      mainAxisAlignment: MainAxisAlignment.center,
                                       children: [
                                         Icon(
-                                          Icons.bookmark_border,
+                                          Icons.delete_outline,
                                           color: appStore.isDarkModeOn
                                               ? gray
                                               : sh_textColorPrimary,
                                           size: 16,
                                         ),
                                         4.width,
-                                        Flexible(
-                                          child: Text(
-                                            "Save for later",
-                                            style: secondaryTextStyle(),
-                                            overflow: TextOverflow.ellipsis,
-                                            maxLines: 1,
-                                          ),
+                                        Text(
+                                          sh_lbl_remove,
+                                          style: secondaryTextStyle(),
                                         ),
                                       ],
-                                    ).onTap(() async {
+                                    ).onTap(() {
                                       if (product.id != null) {
-                                        await WishlistService()
-                                            .addToWishlist(product.id!);
-                                        await CartService()
-                                            .removeFromCart(product.id!);
-                                        toast("Saved for later");
+                                        removeItem(product.id!);
                                       }
                                     }),
                                   ),
-                                  Container(
-                                      width: 1,
-                                      color: sh_view_color,
-                                      height: 35),
                                 ],
-                                Expanded(
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Icon(
-                                        Icons.delete_outline,
-                                        color: appStore.isDarkModeOn
-                                            ? gray
-                                            : sh_textColorPrimary,
-                                        size: 16,
-                                      ),
-                                      4.width,
-                                      Text(sh_lbl_remove,
-                                          style: secondaryTextStyle()),
-                                    ],
-                                  ).onTap(() {
-                                    if (product.id != null) {
-                                      removeItem(product.id!);
-                                    }
-                                  }),
-                                ),
-                              ],
-                            ),
-                          )
-                        ],
-                      ),
-                    )
-                  ],
+                              ),
+                            )
+                          ],
+                        ),
+                      )
+                    ],
+                  ),
                 ),
               );
             },
@@ -456,81 +499,107 @@ class AmCartFragmentState extends State<AmCartFragment> {
             ),
           );
 
-          return SingleChildScrollView(
-            padding: EdgeInsets.only(
-                bottom:
-                    bottomNavBarHeight + 24), // keep content above bottom bar
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Items heading with count
-                Padding(
-                  padding: EdgeInsets.fromLTRB(
-                      spacing_standard_new,
-                      spacing_standard_new,
-                      spacing_standard_new,
-                      spacing_control),
-                  child: Row(
-                    children: [
-                      Text("Items", style: boldTextStyle()),
-                      8.width,
-                      Text("(${cartList.length})", style: secondaryTextStyle()),
-                    ],
-                  ),
-                ),
-                cartItemsList,
-                summarySection,
-                SizedBox(height: 8),
-              ],
-            ),
-          );
-        },
-      ),
-      bottomNavigationBar: StreamBuilder<QuerySnapshot>(
-        stream: CartService().getCartStream(),
-        builder: (context, snapshot) {
-          final hasItems = snapshot.hasData && snapshot.data!.docs.isNotEmpty;
-          return SafeArea(
-            top: false,
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(spacing_standard_new, 8,
-                  spacing_standard_new, kBottomNavigationBarHeight + 12),
-              child: SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
-                  onPressed: (hasItems && !_navigating)
-                      ? () {
-                          if (!mounted) return;
-                          setState(() => _navigating = true);
-                          WidgetsBinding.instance
-                              .addPostFrameCallback((_) async {
-                            if (!mounted) return;
-                            await Navigator.of(context, rootNavigator: true)
-                                .push(
-                              MaterialPageRoute(
-                                  builder: (_) => AmOrderSummaryScreen()),
-                            );
-                            if (mounted) setState(() => _navigating = false);
-                          });
-                        }
-                      : null,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: sh_colorPrimary,
-                    disabledBackgroundColor:
-                        sh_colorPrimary.withValues(alpha: 0.4),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(25),
+          // Calculate responsive bottom padding
+          double responsiveBottomPadding = bottomNavBarHeight + 60; // Adjusted space for button
+
+          return Stack(
+            children: [
+              SingleChildScrollView(
+                padding: EdgeInsets.only(
+                    bottom: responsiveBottomPadding), // keep content above button
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Items heading with count
+                    Padding(
+                      padding: EdgeInsets.fromLTRB(
+                          spacing_standard_new,
+                          spacing_standard_new,
+                          spacing_standard_new,
+                          spacing_control),
+                      child: Row(
+                        children: [
+                          Text("Items", style: boldTextStyle()),
+                          8.width,
+                          Text("(${cartList.length})", style: secondaryTextStyle()),
+                        ],
+                      ),
                     ),
-                    elevation: 0,
-                  ),
-                  child: Text(
-                    "Place Order",
-                    style: boldTextStyle(color: sh_white, size: 16),
-                  ),
+                    cartItemsList,
+                    summarySection,
+                    SizedBox(height: 8),
+                  ],
                 ),
               ),
-            ),
+              // Sticky Place Order Button
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: StreamBuilder<QuerySnapshot>(
+                  stream: CartService().getCartStream(),
+                  builder: (context, snapshot) {
+                    final hasItems = snapshot.hasData && snapshot.data!.docs.isNotEmpty;
+                    return Container(
+                      decoration: BoxDecoration(
+                        color: context.cardColor,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.1),
+                            blurRadius: 4,
+                            offset: Offset(0, -2),
+                          ),
+                        ],
+                      ),
+                      padding: EdgeInsets.only(
+                        left: spacing_standard_new,
+                        right: spacing_standard_new,
+                        top: 12,
+                        bottom: bottomNavBarHeight + 8,
+                      ),
+                      child: SizedBox(
+                        width: double.infinity,
+                        height: width < 360 ? 45 : 50, // Responsive height for smaller screens
+                        child: ElevatedButton(
+                          onPressed: (hasItems && !_navigating)
+                              ? () {
+                                  if (!mounted) return;
+                                  setState(() => _navigating = true);
+                                  WidgetsBinding.instance
+                                      .addPostFrameCallback((_) async {
+                                    if (!mounted) return;
+                                    await Navigator.of(context, rootNavigator: true)
+                                        .push(
+                                      MaterialPageRoute(
+                                          builder: (_) => AmOrderSummaryScreen()),
+                                    );
+                                    if (mounted) setState(() => _navigating = false);
+                                  });
+                                }
+                              : null,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: sh_colorPrimary,
+                            disabledBackgroundColor:
+                                sh_colorPrimary.withValues(alpha: 0.4),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(width < 360 ? 20 : 25), // Responsive radius
+                            ),
+                            elevation: 0,
+                          ),
+                          child: Text(
+                            "Place Order",
+                            style: boldTextStyle(
+                              color: sh_white, 
+                              size: width < 360 ? 14 : 16, // Responsive font size
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
           );
         },
       ),

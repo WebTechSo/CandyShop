@@ -27,6 +27,9 @@ class _AmProductCardState extends State<AmProductCard> {
   bool _refreshing = false;
   bool _inWishlist = false;
   bool _wishlistBusy = false;
+  bool _cartBusy = false;
+  double _wishlistScale = 1.0;
+  double _cartScale = 1.0;
 
   @override
   void initState() {
@@ -43,6 +46,11 @@ class _AmProductCardState extends State<AmProductCard> {
         oldWidget.product.images != widget.product.images) {
       _syncImageCandidates();
     }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   void _syncImageCandidates() {
@@ -84,6 +92,13 @@ class _AmProductCardState extends State<AmProductCard> {
     final id = widget.product.id;
     if (id == null || id.isEmpty) return;
     setState(() => _wishlistBusy = true);
+    
+    // Trigger simple scale animation
+    setState(() => _wishlistScale = 1.3);
+    Future.delayed(Duration(milliseconds: 150), () {
+      if (mounted) setState(() => _wishlistScale = 1.0);
+    });
+    
     try {
       if (_inWishlist) {
         await WishlistService().removeFromWishlist(id);
@@ -279,14 +294,19 @@ class _AmProductCardState extends State<AmProductCard> {
                             : context.cardColor,
                         shape: BoxShape.circle,
                       ),
-                      child: Icon(
-                        _inWishlist ? Icons.favorite : Icons.favorite_border,
-                        color: _inWishlist
-                            ? Colors.redAccent
-                            : (appStore.isDarkModeOn
-                                ? white
-                                : sh_textColorPrimary),
-                        size: 16,
+                      child: AnimatedScale(
+                        scale: _wishlistScale,
+                        duration: Duration(milliseconds: 150),
+                        curve: Curves.easeOut,
+                        child: Icon(
+                          _inWishlist ? Icons.favorite : Icons.favorite_border,
+                          color: _inWishlist
+                              ? Colors.redAccent
+                              : (appStore.isDarkModeOn
+                                  ? white
+                                  : sh_textColorPrimary),
+                          size: 16,
+                        ),
                       ),
                     ).onTap(_toggleWishlist),
                   ),
@@ -319,34 +339,45 @@ class _AmProductCardState extends State<AmProductCard> {
                     Positioned(
                       bottom: 8,
                       right: 8,
-                      child: Container(
-                        padding: EdgeInsets.all(6),
-                        decoration: BoxDecoration(
-                          color: sh_colorPrimary,
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: sh_colorPrimary.withValues(alpha: 0.3),
-                              blurRadius: 4,
-                              offset: Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: Icon(
-                          Icons.add,
-                          color: white,
-                          size: 16,
-                        ),
-                      ).onTap(() async {
-                        if (product.id != null) {
-                          try {
-                            await CartService().addToCart(product);
-                            toast("Added to cart");
-                          } catch (e) {
-                            toast(e.toString());
+                      child: AnimatedScale(
+                        scale: _cartScale,
+                        duration: Duration(milliseconds: 150),
+                        curve: Curves.easeOut,
+                        child: Container(
+                          padding: EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: sh_colorPrimary,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: sh_colorPrimary.withValues(alpha: 0.3),
+                                blurRadius: 4,
+                                offset: Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: Icon(
+                            Icons.add,
+                            color: white,
+                            size: 16,
+                          ),
+                        ).onTap(() async {
+                          if (product.id != null) {
+                            // Trigger simple scale animation
+                            setState(() => _cartScale = 1.4);
+                            Future.delayed(Duration(milliseconds: 150), () {
+                              if (mounted) setState(() => _cartScale = 1.0);
+                            });
+                            
+                            try {
+                              await CartService().addToCart(product);
+                              toast("Added to cart");
+                            } catch (e) {
+                              toast(e.toString());
+                            }
                           }
-                        }
-                      }),
+                        }),
+                      ),
                     ),
                 ],
               ),

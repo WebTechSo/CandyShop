@@ -172,95 +172,88 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
 
         final isSubcategory = node.category.parent != null && node.category.parent != -999999 && node.category.parent != 0;
         
-        return Container(
-          margin: EdgeInsets.only(
-            left: isSubcategory ? 32.0 : 0.0, // More prominent indentation for subcategories
-          ),
-          decoration: BoxDecoration(
-              color: isSubcategory ? Colors.grey[50] : Colors.white, // Different background for subcategories
-              borderRadius: BorderRadius.circular(16),
-              border: isSubcategory 
-                  ? Border.all(color: Colors.grey[300]!, width: 1) 
-                  : null,
-              boxShadow: !isSubcategory ? defaultBoxShadow(shadowColor: appShadowColor) : null),
-          child: ListTile(
-            contentPadding: EdgeInsets.only(
-              left: 16.0,
-              right: 8.0,
+        return InkWell(
+          onTap: hasChildren ? () {
+            setState(() {
+              _expandedState[cat.docId!] = !isExpanded;
+              _updateExpansionState(_categoryTree, cat.docId!, !isExpanded);
+            });
+          } : null,
+          borderRadius: BorderRadius.circular(16),
+          child: Container(
+            margin: EdgeInsets.only(
+              left: isSubcategory ? 32.0 : 0.0,
             ),
-            leading: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (hasChildren)
-                  Container(
-                    decoration: BoxDecoration(
-                      color: sh_colorPrimary.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: IconButton(
-                      icon: Icon(
-                        isExpanded ? Icons.expand_less : Icons.expand_more,
-                        color: sh_colorPrimary,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _expandedState[cat.docId!] = !isExpanded;
-                          // Update all nodes in the tree
-                          _updateExpansionState(_categoryTree, cat.docId!, !isExpanded);
-                        });
-                      },
-                      tooltip: isExpanded ? 'Collapse subcategories' : 'Expand subcategories',
-                    ),
-                  ),
-                if (!hasChildren && isSubcategory)
-                  Container(
-                    width: 40,
-                    height: 40,
-                    margin: EdgeInsets.only(right: 8),
-                    decoration: BoxDecoration(
-                      color: Colors.grey[300],
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Icon(Icons.subdirectory_arrow_right, color: Colors.grey[600], size: 20),
-                  ),
-                _buildCategoryIcon(cat),
-              ],
-            ),
-            title: Text(
-              cat.name ?? 'No Name', 
-              style: boldTextStyle(
-                color: isSubcategory ? Colors.grey[700] : sh_textColorPrimary,
-                size: isSubcategory ? 15 : 16,
+            decoration: BoxDecoration(
+                color: isSubcategory ? Colors.grey[50] : Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                border: isSubcategory 
+                    ? Border.all(color: Colors.grey[300]!, width: 1) 
+                    : null,
+                boxShadow: !isSubcategory ? defaultBoxShadow(shadowColor: appShadowColor) : null),
+            child: ListTile(
+              contentPadding: EdgeInsets.only(
+                left: 16.0,
+                right: 8.0,
               ),
-            ),
-            subtitle: isSubcategory 
-                ? Text('Subcategory of ID: ${node.category.parent}', style: secondaryTextStyle(size: 12, color: Colors.grey[600]))
-                : Text('ID: ${cat.id}${hasChildren ? ' • ${node.children.length} subcategories • Tap ↓ to expand' : ''}', style: secondaryTextStyle(size: 12)),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.edit, color: sh_colorPrimary),
-                  onPressed: () {
-                    AddCategoryScreen(category: cat).launch(context);
-                  },
-                ),
-                IconButton(
-                  icon: const Icon(Icons.delete, color: Colors.red),
-                  onPressed: () async {
-                    bool? confirm = await showConfirmDialog(
-                        context, 'Delete ${cat.name}?');
-                    if (confirm == true && cat.docId != null) {
-                      await FirebaseFirestore.instance
-                          .collection('Categories')
-                          .doc(cat.docId)
-                          .delete();
-                      // Refresh the list after deletion
-                      _loadCategories();
-                    }
-                  },
-                ),
-              ],
+              leading: Container(
+                width: 40,
+                height: 40,
+                child: _buildCategoryIcon(cat),
+              ),
+              title: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      cat.name ?? 'No Name',
+                      style: boldTextStyle(
+                        color: isSubcategory ? Colors.grey[700] : sh_textColorPrimary,
+                        size: isSubcategory ? 15 : 16,
+                      ),
+                    ),
+                  ),
+                  if (hasChildren)
+                    Icon(
+                      isExpanded ? Icons.expand_less : Icons.expand_more,
+                      color: sh_colorPrimary,
+                      size: 20,
+                    ),
+                  if (isSubcategory && !hasChildren)
+                    Icon(
+                      Icons.subdirectory_arrow_right,
+                      color: Colors.grey[600],
+                      size: 16,
+                    ),
+                ],
+              ),
+              subtitle: isSubcategory 
+                  ? Text('Subcategory of ID: ${node.category.parent}', style: secondaryTextStyle(size: 12, color: Colors.grey[600]))
+                  : Text('ID: ${cat.id}${hasChildren ? ' • ${node.children.length} subcategories' : ''}', style: secondaryTextStyle(size: 12)),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.edit, color: sh_colorPrimary),
+                    onPressed: () {
+                      AddCategoryScreen(category: cat).launch(context);
+                    },
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.delete, color: Colors.red),
+                    onPressed: () async {
+                      bool? confirm = await showConfirmDialog(
+                          context, 'Delete ${cat.name}?');
+                      if (confirm == true && cat.docId != null) {
+                        await FirebaseFirestore.instance
+                            .collection('Categories')
+                            .doc(cat.docId)
+                            .delete();
+                        _loadCategories();
+                      }
+                    },
+                  ),
+                ],
+              ),
             ),
           ),
         );

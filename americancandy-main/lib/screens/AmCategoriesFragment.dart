@@ -155,9 +155,11 @@ class _AmCategoriesFragmentState extends State<AmCategoriesFragment> {
   @override
   Widget build(BuildContext context) {
     if (_isCategoriesLoading) {
-      return Padding(
+      return ListView(
         padding: const EdgeInsets.all(16),
-        child: _CategoriesSkeleton(),
+        children: [
+          _CategoriesSkeleton(),
+        ],
       );
     }
 
@@ -194,7 +196,7 @@ class _AmCategoriesFragmentState extends State<AmCategoriesFragment> {
                       child: TextField(
                         controller: _searchCtrl,
                         decoration: InputDecoration.collapsed(
-                          hintText: 'Search products',
+                          hintText: 'Search product',
                         ),
                         onChanged: _onSearchChanged,
                       ),
@@ -432,15 +434,16 @@ class _AmCategoriesFragmentState extends State<AmCategoriesFragment> {
                           });
                         },
                         child: Container(
-                          padding: EdgeInsets.all(4),
+                          padding: EdgeInsets.all(10),
                           decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.2),
-                            borderRadius: BorderRadius.circular(8),
+                            color: Colors.white.withValues(alpha: 0.3),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: Colors.white.withValues(alpha: 0.5), width: 1),
                           ),
                           child: Icon(
-                            isExpanded ? Icons.expand_less : Icons.expand_more,
+                            isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
                             color: white,
-                            size: 20,
+                            size: 28,
                           ),
                         ),
                       ),
@@ -461,7 +464,7 @@ class _AmCategoriesFragmentState extends State<AmCategoriesFragment> {
                             ),
                             if (hasChildren)
                               Text(
-                                '${node.children.length} subcategories • Tap ↓ to expand',
+                                '${node.children.length} subcategories',
                                 style: secondaryTextStyle(
                                     color: white.withValues(alpha: 0.8),
                                     size: 11),
@@ -658,11 +661,19 @@ class _CategoriesSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final base = Colors.grey.shade300;
+    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
+    
+    // Calculate responsive item height based on screen size
+    final itemHeight = screenHeight * 0.12; // 12% of screen height
+    final itemCount = (screenHeight / (itemHeight + 12)).floor().clamp(3, 6); // 3-6 items based on screen
+    
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: List.generate(
-        6,
+        itemCount,
         (_) => Container(
-          height: 110, // height for skeleton
+          height: itemHeight,
           margin: EdgeInsets.only(bottom: 12),
           decoration: BoxDecoration(
             color: base,

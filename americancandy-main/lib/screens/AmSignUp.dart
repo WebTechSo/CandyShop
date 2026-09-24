@@ -153,7 +153,7 @@ class AmSignUpState extends State<AmSignUp> {
                             buildInputField("Registration Number",
                                 controller: controller.registrationNumberCont),
                             12.height,
-                            buildInputField("Optional VAT Number",
+                            buildInputField("VAT Number (Optional)",
                                 controller: controller.vatNumberCont),
                             24.height,
 
