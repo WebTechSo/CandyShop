@@ -341,7 +341,13 @@ class AmSignInState extends State<AmSignIn> {
       await cred.user?.reload();
       final verified = cred.user?.emailVerified ?? false;
       if (!verified) {
-        Get.offAll(() => const VerifyEmailScreen());
+        Get.snackbar(
+          "Email Not Verified",
+          "Please verify your email before signing in",
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
         return;
       }
       Get.offAll(() => AmHomeScreen());

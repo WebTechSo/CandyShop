@@ -96,6 +96,7 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
     setState(() => _isLoading = true);
     _categoriesSubscription = FirebaseFirestore.instance
         .collection('Categories')
+        .orderBy('menu_order', descending: false)
         .snapshots()
         .listen((snapshot) {
       final categories = snapshot.docs
@@ -161,7 +162,7 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
     final flattenedList = CategoryHelper.flattenTree(_categoryTree, expandedOnly: true);
 
     return ListView.separated(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 80),
       itemCount: flattenedList.length,
       separatorBuilder: (_, __) => 8.height,
       itemBuilder: (_, i) {

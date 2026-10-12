@@ -58,7 +58,7 @@ class _AmFilterScreenState extends State<AmFilterScreen> {
   Future<void> loadCategories() async {
     try {
       QuerySnapshot querySnapshot =
-          await FirebaseFirestore.instance.collection('Categories').get();
+          await FirebaseFirestore.instance.collection('Categories').orderBy('menu_order', descending: false).get();
       List<AmCategory> fetchedCategories = querySnapshot.docs
           .map((doc) => AmCategory.fromQuerySnapshot(doc))
           .toList();
@@ -67,6 +67,12 @@ class _AmFilterScreenState extends State<AmFilterScreen> {
           for (final c in fetchedCategories) {
             c.isSelected = false;
           }
+          // Sort by menu_order
+          fetchedCategories.sort((a, b) {
+            final aOrder = a.menuOrder ?? 0;
+            final bOrder = b.menuOrder ?? 0;
+            return aOrder.compareTo(bOrder);
+          });
           categories = fetchedCategories;
         });
       }

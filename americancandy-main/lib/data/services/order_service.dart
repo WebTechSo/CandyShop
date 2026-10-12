@@ -107,6 +107,7 @@ class OrderService {
     final orderRef = _firestore.collection('Orders').doc(orderId);
 
     await _firestore.runTransaction((tx) async {
+      List<Map<String, dynamic>> productUpdates = [];
       for (final product in products) {
         final pid = product.id;
         if (pid == null) throw Exception('Product ID is null');
@@ -125,13 +126,25 @@ class OrderService {
         if (status != 'active') throw Exception('Product unavailable');
         if (available < qty) throw Exception('Out of Stock');
 
-        tx.update(prodRef, {
-          'available_quantity': FieldValue.increment(-qty),
+        // Store the update info for later
+        productUpdates.add({
+          'ref': prodRef,
+          'qty': qty,
         });
       }
 
+      // PHASE 2: Write all data after reads are complete
+      // Update product quantities
+      for (final update in productUpdates) {
+        tx.update(update['ref'] as DocumentReference, {
+          'available_quantity': FieldValue.increment(-(update['qty'] as int)),
+        });
+      }
+
+      // Create order document
       tx.set(orderRef, orderData);
 
+      // Create order items
       for (final product in products) {
         final String itemId = _firestore.collection('order_items').doc().id;
         final itemRef = _firestore.collection('order_items').doc(itemId);
@@ -230,6 +243,7 @@ class OrderService {
     final orderRef = _firestore.collection('Orders').doc(orderId);
 
     await _firestore.runTransaction((tx) async {
+      // PHASE 1: Read order status
       final orderSnap = await tx.get(orderRef);
       if (!orderSnap.exists) {
         throw Exception('Order not found');
@@ -238,8 +252,9 @@ class OrderService {
       if (currentStatus == 'Cancelled') {
         throw Exception('Order is already cancelled');
       }
-      tx.update(orderRef, {'delivery_status': status});
 
+      // PHASE 2: If cancelling, read order items
+      List<Map<String, dynamic>> productRestocks = [];
       if (status == 'Cancelled') {
         final itemsSnap = await _firestore
             .collection('order_items')
@@ -253,12 +268,22 @@ class OrderService {
 
           if (productId != null && productId.isNotEmpty) {
             final prodRef = _firestore.collection('Products').doc(productId);
-
-            tx.update(prodRef, {
-              'available_quantity': FieldValue.increment(quantity),
+            productRestocks.add({
+              'ref': prodRef,
+              'qty': quantity,
             });
           }
         }
+      }
+
+      // PHASE 3: Write all updates
+      tx.update(orderRef, {'delivery_status': status});
+
+      // Restock products if cancelled
+      for (final restock in productRestocks) {
+        tx.update(restock['ref'] as DocumentReference, {
+          'available_quantity': FieldValue.increment(restock['qty'] as int),
+        });
       }
     });
   }

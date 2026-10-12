@@ -519,7 +519,7 @@ class AmAccountScreenState extends State<AmAccountScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: <Widget>[
-                        Text("Please Verify you email",
+                        Text("Please Verify your email",
                             style: primaryTextStyle()),
                         Image.asset(sh_radar, width: 30, height: 30).expand(),
                       ],

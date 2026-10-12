@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:get/get.dart';
 import 'package:american_sweets/utils/constants/texts.dart';
 import 'package:american_sweets/data/repositories/authentication_repository.dart';
-import 'package:american_sweets/screens/AmHomeScreen.dart';
+import 'package:american_sweets/screens/AmSignIn.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:american_sweets/utils/AmColors.dart';
 import 'package:american_sweets/utils/AmConstant.dart';
@@ -189,7 +189,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                               color: sh_colorPrimary,
                               onPressed: widget.onPrimaryPressed ??
                                   () {
-                                    Get.offAll(() => AmHomeScreen());
+                                    Get.offAll(() => AmSignIn());
                                   },
                             ),
                           ),

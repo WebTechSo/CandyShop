@@ -100,6 +100,7 @@ class AmSignUpState extends State<AmSignUp> {
                         autovalidateMode: AutovalidateMode.onUserInteraction,
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             // Logo & title
                             Image.asset(ic_app_icon, width: width * 0.22),
@@ -128,6 +129,19 @@ class AmSignUpState extends State<AmSignUp> {
                                 color: sh_colorPrimary,
                               ),
                             ),
+                            const SizedBox(height: 4),
+                            SizedBox(
+                              width: double.infinity,
+                              child: Text(
+                                "Please Call or Text 07833325000 for Manual Orders",
+                                textAlign: TextAlign.center,
+                                style: GoogleFonts.workSans(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: sh_colorPrimary,
+                                ),
+                              ),
+                            ),
                             32.height,
 
                             // -------- BUSINESS DETAILS --------
@@ -142,13 +156,23 @@ class AmSignUpState extends State<AmSignUp> {
                                 controller: controller.businessNameCont,
                                 required: true),
                             12.height,
-                            buildDropdownField(
-                                "Country of Registration",
-                                (val) => controller
-                                    .registrationCountryCont.value = val ?? '',
-                                selectedValue:
-                                    controller.registrationCountryCont,
-                                countriesList: controller.variantCountries),
+                            TextFormField(
+                              initialValue: 'United Kingdom',
+                              enabled: false,
+                              decoration: InputDecoration(
+                                labelText: 'Country of Registration',
+                                labelStyle: primaryTextStyle(),
+                                floatingLabelBehavior: FloatingLabelBehavior.always,
+                                contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                                disabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(color: Colors.grey.shade300, width: 1),
+                                ),
+                                filled: true,
+                                fillColor: Colors.grey.shade100,
+                              ),
+                              style: primaryTextStyle(),
+                            ),
                             12.height,
                             buildInputField("Registration Number",
                                 controller: controller.registrationNumberCont),
@@ -449,7 +473,7 @@ class AmSignUpState extends State<AmSignUp> {
   }
 
   Widget buildDropdownField(String label, Function(String?) onChanged,
-      {RxString? selectedValue, RxList<String>? countriesList}) {
+      {RxString? selectedValue, RxList<String>? countriesList, bool enabled = true}) {
     return Obx(() {
       final items = countriesList?.toList() ?? <String>[];
       return DropdownButtonFormField<String>(
@@ -466,8 +490,12 @@ class AmSignUpState extends State<AmSignUp> {
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide(color: sh_colorPrimary, width: 1),
           ),
+          disabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.grey.shade300, width: 1),
+          ),
           filled: true,
-          fillColor: context.cardColor,
+          fillColor: enabled ? context.cardColor : Colors.grey.shade100,
         ),
         value: selectedValue != null && selectedValue.value.isNotEmpty
             ? selectedValue.value
@@ -482,7 +510,7 @@ class AmSignUpState extends State<AmSignUp> {
             ),
           );
         }).toList(),
-        onChanged: onChanged,
+        onChanged: enabled ? onChanged : null,
       );
     });
   }

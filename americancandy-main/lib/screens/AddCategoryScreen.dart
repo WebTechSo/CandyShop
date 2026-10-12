@@ -121,7 +121,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
   Future<void> _fetchCategories() async {
     try {
       QuerySnapshot<Map<String, dynamic>> snapshot =
-          await FirebaseFirestore.instance.collection('Categories').get();
+          await FirebaseFirestore.instance.collection('Categories').orderBy('menu_order', descending: false).get();
       List<AmCategory> loaded =
           snapshot.docs.map((doc) => AmCategory.fromSnapshot(doc)).toList();
 
@@ -140,6 +140,13 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
       if (widget.category != null) {
         loaded.removeWhere((c) => c.id == widget.category!.id);
       }
+
+      // Sort by menu_order for both main categories and subcategories
+      loaded.sort((a, b) {
+        final aOrder = a.menuOrder ?? 0;
+        final bOrder = b.menuOrder ?? 0;
+        return aOrder.compareTo(bOrder);
+      });
 
       setState(() {
         categoryList = loaded;

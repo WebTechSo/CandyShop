@@ -13,12 +13,129 @@ import 'package:american_sweets/data/services/cart_service.dart';
 import 'package:american_sweets/data/services/wishlist_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:american_sweets/data/repositories/authentication_repository.dart';
+import 'package:vibration/vibration.dart';
 
 class CartProduct {
   AmProductModel product;
   int quantity;
 
   CartProduct({required this.product, required this.quantity});
+}
+
+class QuantityControl extends StatefulWidget {
+  final int quantity;
+  final String productId;
+  final Function(int) onUpdate;
+  final Function onVibrate;
+
+  const QuantityControl({
+    required this.quantity,
+    required this.productId,
+    required this.onUpdate,
+    required this.onVibrate,
+  });
+
+  @override
+  _QuantityControlState createState() => _QuantityControlState();
+}
+
+class _QuantityControlState extends State<QuantityControl> {
+  bool _removePressed = false;
+  bool _addPressed = false;
+
+  void _handleRemove() {
+    if (widget.quantity > 1) {
+      widget.onVibrate();
+      setState(() {
+        _removePressed = true;
+      });
+      Future.delayed(Duration(milliseconds: 100), () {
+        if (mounted) {
+          setState(() {
+            _removePressed = false;
+          });
+        }
+      });
+      widget.onUpdate(widget.quantity - 1);
+    }
+  }
+
+  void _handleAdd() {
+    widget.onVibrate();
+    setState(() {
+      _addPressed = true;
+    });
+    Future.delayed(Duration(milliseconds: 100), () {
+      if (mounted) {
+        setState(() {
+          _addPressed = false;
+        });
+      }
+    });
+    widget.onUpdate(widget.quantity + 1);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(color: sh_view_color, width: 1),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              color: _removePressed
+                  ? sh_colorPrimary.withValues(alpha: 0.2)
+                  : Colors.transparent,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(8),
+                bottomLeft: Radius.circular(8),
+              ),
+            ),
+            child: IconButton(
+              icon: Icon(Icons.remove,
+                  size: 16,
+                  color: appStore.isDarkModeOn
+                      ? white
+                      : sh_textColorPrimary),
+              onPressed: _handleRemove,
+              padding: EdgeInsets.zero,
+              constraints: BoxConstraints(minWidth: 32, minHeight: 32),
+              splashColor: Colors.transparent,
+              highlightColor: Colors.transparent,
+            ),
+          ),
+          Text("${widget.quantity}", style: primaryTextStyle()),
+          Container(
+            decoration: BoxDecoration(
+              color: _addPressed
+                  ? sh_colorPrimary.withValues(alpha: 0.2)
+                  : Colors.transparent,
+              borderRadius: BorderRadius.only(
+                topRight: Radius.circular(8),
+                bottomRight: Radius.circular(8),
+              ),
+            ),
+            child: IconButton(
+              icon: Icon(Icons.add,
+                  size: 16,
+                  color: appStore.isDarkModeOn
+                      ? white
+                      : sh_textColorPrimary),
+              onPressed: _handleAdd,
+              padding: EdgeInsets.zero,
+              constraints: BoxConstraints(minWidth: 32, minHeight: 32),
+              splashColor: Colors.transparent,
+              highlightColor: Colors.transparent,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class AmCartFragment extends StatefulWidget {
@@ -30,7 +147,6 @@ class AmCartFragment extends StatefulWidget {
 
 class AmCartFragmentState extends State<AmCartFragment> {
   bool includeVat = getBoolAsync('include_vat', defaultValue: true);
-  bool _navigating = false;
   final Map<String, bool> _isHovered = {}; // Track hover state for each item
 
   @override
@@ -39,18 +155,26 @@ class AmCartFragmentState extends State<AmCartFragment> {
     // No fetch needed, StreamBuilder handles it
   }
 
+  Future<void> _vibrate() async {
+    try {
+      final hasVibrator = await Vibration.hasVibrator();
+      if (hasVibrator ?? false) {
+        await Vibration.vibrate(pattern: [0, 100]);
+      }
+    } catch (e) {
+      print("vibration not supported: $e");
+    }
+  }
+
   void updateQuantity(String productId, int newQuantity) {
     if (newQuantity < 1) return;
     CartService().updateQuantity(productId, newQuantity);
   }
 
   void removeItem(String productId) {
+    _vibrate();
     CartService().removeFromCart(productId);
     toast("Item removed from cart");
-    
-    // Vibrate on remove - try multiple methods for better compatibility
-    HapticFeedback.vibrate();
-    HapticFeedback.heavyImpact();
   }
 
   @override
@@ -252,50 +376,13 @@ class AmCartFragmentState extends State<AmCartFragment> {
                                       style: boldTextStyle(size: 14),
                                     ),
                                     8.height,
-                                    Container(
-                                      decoration: BoxDecoration(
-                                        border: Border.all(
-                                            color: sh_view_color, width: 1),
-                                        borderRadius: BorderRadius.circular(8),
-                                        color: _isHovered[product.id ?? ''] == true 
-                                            ? sh_colorPrimary.withValues(alpha: 0.1)
-                                            : Colors.transparent,
-                                      ),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          IconButton(
-                                            icon: Icon(Icons.remove,
-                                                size: 16,
-                                                color: appStore.isDarkModeOn
-                                                    ? white
-                                                    : sh_textColorPrimary),
-                                            onPressed: () {
-                                              updateQuantity(product.id!,
-                                                  cartProduct.quantity - 1);
-                                            },
-                                            padding: EdgeInsets.zero,
-                                            constraints: BoxConstraints(
-                                                minWidth: 32, minHeight: 32),
-                                          ),
-                                          Text("${cartProduct.quantity}",
-                                              style: primaryTextStyle()),
-                                          IconButton(
-                                            icon: Icon(Icons.add,
-                                                size: 16,
-                                                color: appStore.isDarkModeOn
-                                                    ? white
-                                                    : sh_textColorPrimary),
-                                            onPressed: () {
-                                              updateQuantity(product.id!,
-                                                  cartProduct.quantity + 1);
-                                            },
-                                            padding: EdgeInsets.zero,
-                                            constraints: BoxConstraints(
-                                                minWidth: 32, minHeight: 32),
-                                          ),
-                                        ],
-                                      ),
+                                    QuantityControl(
+                                      quantity: cartProduct.quantity,
+                                      productId: product.id ?? '',
+                                      onUpdate: (newQuantity) {
+                                        updateQuantity(product.id ?? '', newQuantity);
+                                      },
+                                      onVibrate: _vibrate,
                                     )
                                   ],
                                 ).paddingOnly(left: 8.0, top: spacing_control),
@@ -351,15 +438,13 @@ class AmCartFragmentState extends State<AmCartFragment> {
                                         ],
                                       ).onTap(() async {
                                         if (product.id != null) {
+                                          _vibrate();
                                           try {
                                             await WishlistService()
                                                 .addToWishlist(product.id!);
                                             await CartService()
                                                 .removeFromCart(product.id!);
                                             toast("Item saved for later");
-                                            // Vibrate - try multiple methods for better compatibility
-                                            HapticFeedback.vibrate();
-                                            HapticFeedback.heavyImpact();
                                           } catch (e) {
                                             toast("Failed to save item");
                                           }
@@ -561,10 +646,9 @@ class AmCartFragmentState extends State<AmCartFragment> {
                         width: double.infinity,
                         height: width < 360 ? 45 : 50, // Responsive height for smaller screens
                         child: ElevatedButton(
-                          onPressed: (hasItems && !_navigating)
+                          onPressed: (hasItems)
                               ? () {
                                   if (!mounted) return;
-                                  setState(() => _navigating = true);
                                   WidgetsBinding.instance
                                       .addPostFrameCallback((_) async {
                                     if (!mounted) return;
@@ -573,7 +657,6 @@ class AmCartFragmentState extends State<AmCartFragment> {
                                       MaterialPageRoute(
                                           builder: (_) => AmOrderSummaryScreen()),
                                     );
-                                    if (mounted) setState(() => _navigating = false);
                                   });
                                 }
                               : null,

@@ -105,12 +105,18 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
   Future<void> _loadCategories() async {
     try {
       final snap =
-          await FirebaseFirestore.instance.collection('Categories').get();
+          await FirebaseFirestore.instance.collection('Categories').orderBy('menu_order', descending: false).get();
       if (mounted) {
         setState(() {
           _categories = snap.docs
               .map((doc) => AmCategory.fromQuerySnapshot(doc))
               .toList();
+          // Sort by menu_order
+          _categories.sort((a, b) {
+            final aOrder = a.menuOrder ?? 0;
+            final bOrder = b.menuOrder ?? 0;
+            return aOrder.compareTo(bOrder);
+          });
           if (_categories.isNotEmpty && !_categories.any((e) => e.id == _selectedCategory)) {
             _selectedCategory = _categories.first.id!;
           }

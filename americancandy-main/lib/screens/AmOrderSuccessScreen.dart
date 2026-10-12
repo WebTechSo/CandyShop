@@ -40,7 +40,7 @@ class AmOrderSuccessScreen extends StatelessWidget {
             children: <Widget>[
               // Brand logo and name
               Image.asset(
-                'images/american-confectioners-ltd.png',
+                'images/american-confectioners-ltd-new.png',
                 width: 260,
                 height: 90,
                 fit: BoxFit.contain,

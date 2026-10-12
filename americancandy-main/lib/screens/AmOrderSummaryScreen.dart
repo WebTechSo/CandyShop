@@ -498,7 +498,7 @@ class AmOrderSummaryScreenState extends State<AmOrderSummaryScreen> {
     pw.MemoryImage? logoImage;
     try {
       final data =
-      await rootBundle.load('images/american-confectioners-ltd.png');
+      await rootBundle.load('images/american-confectioners-ltd-new.png');
       logoImage = pw.MemoryImage(data.buffer.asUint8List());
     } catch (_) {}
 

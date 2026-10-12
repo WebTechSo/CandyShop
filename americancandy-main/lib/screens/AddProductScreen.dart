@@ -126,12 +126,18 @@ class _AddProductScreenState extends State<AddProductScreen> {
   Future<void> _fetchCategories() async {
     try {
       final snapshot =
-          await FirebaseFirestore.instance.collection('Categories').get();
+          await FirebaseFirestore.instance.collection('Categories').orderBy('menu_order', descending: false).get();
       if (mounted) {
         setState(() {
           _categories = snapshot.docs
               .map((doc) => AmCategory.fromQuerySnapshot(doc))
               .toList();
+          // Sort by menu_order
+          _categories.sort((a, b) {
+            final aOrder = a.menuOrder ?? 0;
+            final bOrder = b.menuOrder ?? 0;
+            return aOrder.compareTo(bOrder);
+          });
           if (_categories.isNotEmpty && _selectedCategory == null) {
             _selectedCategory = _categories.first.id;
             _initializeCategorySelection();
