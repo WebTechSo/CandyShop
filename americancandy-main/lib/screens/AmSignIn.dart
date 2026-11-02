@@ -80,7 +80,8 @@ class AmSignInState extends State<AmSignIn> {
                 fit: BoxFit.cover,
               ),
             ),
-            SingleChildScrollView(
+            SafeArea(
+              child: SingleChildScrollView(
               child: Padding(
                 padding: const EdgeInsets.all(24.0),
                 child: Form(
@@ -293,6 +294,7 @@ class AmSignInState extends State<AmSignIn> {
                   ),
                 ),
               ),
+            ),
             ),
             Positioned(
               top: 30,

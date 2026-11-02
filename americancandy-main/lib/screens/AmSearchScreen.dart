@@ -54,11 +54,14 @@ class AmSearchScreenState extends State<AmSearchScreen> {
 
     List<AmProductModel> filteredList = [];
     allProducts.forEach((product) {
-      if (product.name!.toLowerCase().contains(searchText.toLowerCase())) {
+      if ((product.name ?? '')
+          .toLowerCase()
+          .contains(searchText.toLowerCase())) {
         filteredList.add(product);
       }
     });
 
+    if (!mounted) return;
     setState(() {
       list.clear();
       list.addAll(filteredList);
@@ -70,10 +73,9 @@ class AmSearchScreenState extends State<AmSearchScreen> {
   @override
   Widget build(BuildContext context) {
     var width = MediaQuery.of(context).size.width;
-    var searchList = ListView.builder(
+      var searchList = ListView.builder(
       itemCount: list.length,
-      physics: NeverScrollableScrollPhysics(),
-      shrinkWrap: true,
+      padding: EdgeInsets.only(bottom: 24),
       itemBuilder: (context, index) {
         return InkWell(
           onTap: () {
@@ -265,31 +267,31 @@ class AmSearchScreenState extends State<AmSearchScreen> {
               : Container()
         ],
       ),
-      body: SingleChildScrollView(
-        physics: BouncingScrollPhysics(),
-        child: !isEmpty
-            ? isLoadingMoreData
-                ? Column(
-                    children: [searchList, loadingWidgetMaker()],
-                  )
-                : searchList
-            : Center(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    80.height,
-                    Text(
-                        "No results found for \"" +
-                            searchController.text +
-                            "\"",
-                        style: boldTextStyle(size: 22)),
-                    8.height,
-                    Text("Try a diffetent keyword", style: secondaryTextStyle())
-                  ],
-                ),
+      body: isEmpty
+          ? Center(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Text(
+                      "No results found for \"" + searchController.text + "\"",
+                      style: boldTextStyle(size: 22),
+                      textAlign: TextAlign.center),
+                  8.height,
+                  Text("Try a diffetent keyword", style: secondaryTextStyle())
+                ],
               ),
-      ),
+            )
+          : isLoadingMoreData
+              ? Stack(
+                  children: [
+                    searchList,
+                    Align(
+                        alignment: Alignment.bottomCenter,
+                        child: loadingWidgetMaker()),
+                  ],
+                )
+              : searchList,
     );
   }
 }

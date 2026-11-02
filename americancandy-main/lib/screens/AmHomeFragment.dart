@@ -344,13 +344,9 @@ class AmHomeFragmentState extends State<AmHomeFragment> {
     return SafeArea(
       child: Scaffold(
         body: !isLoading
-            ? SingleChildScrollView(
-                child: Container(
-                  padding: EdgeInsets.only(bottom: 30),
-                  child: Column(
-                    children: <Widget>[
-                      // Search Bar and Filter Button Section
-                      Container(
+            ? CustomScrollView(
+                slivers: [
+                      SliverToBoxAdapter(child: Container(
                         padding: EdgeInsets.all(16),
                         color: context.cardColor,
                         child: Row(
@@ -412,12 +408,10 @@ class AmHomeFragmentState extends State<AmHomeFragment> {
 
                           ],
                         ),
-                      ),
-
-                      // Show search results or normal content
-                      if (isSearching) ...[
+                      )),
+                if (isSearching) ...[
                         if (searchResults.isEmpty)
-                          Container(
+                          SliverToBoxAdapter(child: Container(
                             padding: EdgeInsets.all(20),
                             child: Column(
                               children: [
@@ -442,12 +436,10 @@ class AmHomeFragmentState extends State<AmHomeFragment> {
                                 ),
                               ],
                             ),
-                          )
-                        else
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Padding(
+                          ))
+                        else ...[
+                          SliverToBoxAdapter(
+                            child: Padding(
                                 padding: EdgeInsets.all(16),
                                 child: Row(
                                   mainAxisAlignment:
@@ -470,13 +462,13 @@ class AmHomeFragmentState extends State<AmHomeFragment> {
                                   ],
                                 ),
                               ),
-                              _buildProductGrid(searchResults),
-                              SizedBox(height: 30),
-                            ],
                           ),
+                          _buildProductGrid(searchResults),
+                          SliverToBoxAdapter(child: SizedBox(height: 30)),
+                        ],
                       ] else ...[
                         // Product Tabs Section
-                        Container(
+                        SliverToBoxAdapter(child: Container(
                           margin:
                               EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                           decoration: BoxDecoration(
@@ -494,14 +486,14 @@ class AmHomeFragmentState extends State<AmHomeFragment> {
                               ),
                             ],
                           ),
-                        ),
+                        )),
 
                         // Products Grid based on selected tab
                         if ((selectedProductTab == 0
                                 ? newestProducts
                                 : featuredProducts)
                             .isEmpty)
-                          Container(
+                          SliverToBoxAdapter(child: Container(
                             padding: EdgeInsets.all(40),
                             child: Center(
                               child: Column(
@@ -546,16 +538,14 @@ class AmHomeFragmentState extends State<AmHomeFragment> {
                                 ],
                               ),
                             ),
-                          )
+                          ))
                         else
                           _buildProductGrid(selectedProductTab == 0
                               ? newestProducts
                               : featuredProducts),
-                        SizedBox(height: 60),
+                        SliverToBoxAdapter(child: SizedBox(height: 60)),
                       ],
-                    ],
-                  ),
-                ),
+                ],
               )
             : _HomeSkeletonLoader(),
       ),
@@ -608,21 +598,19 @@ class AmHomeFragmentState extends State<AmHomeFragment> {
     } else if (w < 360) {
       aspect = 0.66;
     }
-    return Container(
-      padding: EdgeInsets.all(16),
-      child: GridView.builder(
-        physics: NeverScrollableScrollPhysics(),
-        shrinkWrap: true,
+    return SliverPadding(
+      padding: EdgeInsets.fromLTRB(16, 8, 16, 16),
+      sliver: SliverGrid(
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
           childAspectRatio: aspect,
           crossAxisSpacing: 16,
           mainAxisSpacing: 16,
         ),
-        itemCount: products.length,
-        itemBuilder: (context, index) {
-          return AmProductCard(product: products[index]);
-        },
+        delegate: SliverChildBuilderDelegate(
+          (context, index) => AmProductCard(product: products[index]),
+          childCount: products.length,
+        ),
       ),
     );
   }

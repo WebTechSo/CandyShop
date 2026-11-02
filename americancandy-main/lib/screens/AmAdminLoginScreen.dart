@@ -107,7 +107,8 @@ class _AmAdminLoginScreenState extends State<AmAdminLoginScreen> {
               ),
             ),
 
-            SingleChildScrollView(
+            SafeArea(
+              child: SingleChildScrollView(
               child: Padding(
                 padding: const EdgeInsets.all(24.0),
                 child: Form(
@@ -246,6 +247,7 @@ class _AmAdminLoginScreenState extends State<AmAdminLoginScreen> {
                   ),
                 ),
               ),
+            ),
             ),
           ],
         ),

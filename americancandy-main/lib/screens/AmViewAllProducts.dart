@@ -262,12 +262,10 @@ class AmViewAllProductscreenState extends State<AmViewAllProductscreen> {
   @override
   Widget build(BuildContext context) {
     var width = MediaQuery.of(context).size.width;
-    final listView = Container(
-      padding: EdgeInsets.symmetric(horizontal: 16),
-      child: ListView.separated(
+    final listView = ListView.separated(
+        controller: scrollController,
+        padding: EdgeInsets.fromLTRB(16, 16, 16, 24),
         itemCount: mProductModel.length,
-        physics: NeverScrollableScrollPhysics(),
-        shrinkWrap: true,
         separatorBuilder: (_, __) => 16.height,
         itemBuilder: (context, index) {
           final p = mProductModel[index];
@@ -404,14 +402,11 @@ class AmViewAllProductscreenState extends State<AmViewAllProductscreen> {
             ),
           );
         },
-      ),
     );
 
-    final gridView = Container(
-      padding: EdgeInsets.all(16),
-      child: GridView.builder(
-        physics: NeverScrollableScrollPhysics(),
-        shrinkWrap: true,
+    final gridView = GridView.builder(
+        controller: scrollController,
+        padding: EdgeInsets.fromLTRB(16, 16, 16, 24),
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
           childAspectRatio: (() {
@@ -427,7 +422,6 @@ class AmViewAllProductscreenState extends State<AmViewAllProductscreen> {
         itemBuilder: (context, index) {
           return AmProductCard(product: mProductModel[index]);
         },
-      ),
     );
 
     final bool isCompact =
@@ -514,32 +508,22 @@ class AmViewAllProductscreenState extends State<AmViewAllProductscreen> {
       ),
       body: isLoading
           ? _CategorySkeletonLoader()
-          : SingleChildScrollView(
-              controller: scrollController,
-              child: Column(
-                children: <Widget>[
-                  errorMsg.isEmpty
-                      ? Center(
-                          child: mProductModel.isNotEmpty
-                              ? Column(children: <Widget>[
-                                  isListViewSelected ? listView : gridView,
-                                  CircularProgressIndicator()
-                                      .visible(isLoadingMoreData)
-                                ])
-                              : Padding(
-                                  padding:
-                                      const EdgeInsets.fromLTRB(16, 48, 16, 80),
-                                  child: Text(
-                                    'No Product found',
-                                    style: secondaryTextStyle(size: 16),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ),
-                        )
-                      : Center(child: Text(errorMsg)),
-                ],
-              ),
-            ),
+          : errorMsg.isNotEmpty
+              ? Center(child: Text(errorMsg))
+              : mProductModel.isEmpty
+                  ? Center(
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 48, 16, 80),
+                        child: Text(
+                          'No Product found',
+                          style: secondaryTextStyle(size: 16),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    )
+                  : isListViewSelected
+                      ? listView
+                      : gridView,
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: 1, // Products
         type: BottomNavigationBarType.fixed,

@@ -83,7 +83,8 @@ class AmCheckYouEmailState extends State<AmCheckYouEmail> {
             ),
 
             // Main content (scrollable)
-            SingleChildScrollView(
+            SafeArea(
+              child: SingleChildScrollView(
               child: Padding(
                 padding: const EdgeInsets.all(24.0),
                 child: Column(
@@ -144,6 +145,7 @@ class AmCheckYouEmailState extends State<AmCheckYouEmail> {
                   ],
                 ),
               ),
+            ),
             ),
           ],
         ),

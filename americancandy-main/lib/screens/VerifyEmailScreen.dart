@@ -144,7 +144,8 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
 
           Align(
             alignment: Alignment.center,
-            child: SingleChildScrollView(
+            child: SafeArea(
+              child: SingleChildScrollView(
               child: Center(
                 child: Container(
                   width: cardWidth,
@@ -265,6 +266,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                   ),
                 ),
               ),
+            ),
             ),
           ),
         ],

@@ -245,9 +245,11 @@ class _AmCategoriesFragmentState extends State<AmCategoriesFragment> {
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(color: sh_view_color, width: 1),
                   ),
-                  child: ListView.separated(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
+                  child: SizedBox(
+                    height: _productSuggestions.length * 69.0 > 320
+                        ? 320
+                        : _productSuggestions.length * 69.0,
+                    child: ListView.separated(
                     itemCount: _productSuggestions.length,
                     separatorBuilder: (_, __) =>
                         Divider(height: 1, color: sh_view_color),
@@ -327,7 +329,8 @@ class _AmCategoriesFragmentState extends State<AmCategoriesFragment> {
                       );
                     },
                   ),
-                ),
+                    ),
+                  ),
               if (showOnlyProductSearch &&
                   !_loadingProducts &&
                   _productsLoaded &&

@@ -100,7 +100,8 @@ class _AmNewPasswordScreenState extends State<AmNewPasswordScreen> {
             ),
 
             // Content
-            SingleChildScrollView(
+            SafeArea(
+              child: SingleChildScrollView(
               child: Padding(
                 padding: const EdgeInsets.all(24.0),
                 child: Container(
@@ -201,6 +202,7 @@ class _AmNewPasswordScreenState extends State<AmNewPasswordScreen> {
                   ),
                 ),
               ),
+            ),
             ),
           ],
         ),

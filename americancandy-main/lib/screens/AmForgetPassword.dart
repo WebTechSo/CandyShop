@@ -209,7 +209,8 @@ class AmSweetsForgetPasswordState extends State<AmSweetsForgetPassword> {
             ),
 
             // Main content (scrollable)
-            SingleChildScrollView(
+            SafeArea(
+              child: SingleChildScrollView(
               child: Padding(
                 padding: const EdgeInsets.all(24.0),
                 child: Form(
@@ -315,6 +316,7 @@ class AmSweetsForgetPasswordState extends State<AmSweetsForgetPassword> {
                   ),
                 ),
               ),
+            ),
             ),
           ],
         ),
