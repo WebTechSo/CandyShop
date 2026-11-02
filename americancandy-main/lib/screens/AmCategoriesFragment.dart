@@ -146,7 +146,7 @@ class _AmCategoriesFragmentState extends State<AmCategoriesFragment> {
   void _syncExpansionStates(List<CategoryNode> tree) {
     for (var node in tree) {
       if (node.category.docId != null) {
-        node.isExpanded = _expandedState[node.category.docId!] ?? false;
+        node.isExpanded = _expandedState[node.category.docId ?? ''] ?? false;
       }
       _syncExpansionStates(node.children);
     }
@@ -427,9 +427,11 @@ class _AmCategoriesFragmentState extends State<AmCategoriesFragment> {
                       GestureDetector(
                         onTap: () {
                           print('Toggling category: ${cat.name}, current state: $isExpanded');
+                          final id = cat.docId;
+                          if (id == null) return;
                           setState(() {
-                            _expandedState[cat.docId!] = !isExpanded;
-                            _updateExpansionState(_categoryTree, cat.docId!, !isExpanded);
+                            _expandedState[id] = !isExpanded;
+                            _updateExpansionState(_categoryTree, id, !isExpanded);
                             print('New expansion state: ${_expandedState[cat.docId]}');
                           });
                         },
@@ -460,7 +462,8 @@ class _AmCategoriesFragmentState extends State<AmCategoriesFragment> {
                                   color: white, 
                                   size: isSubcategory ? 16 : 18,
                                   weight: isSubcategory ? FontWeight.w600 : FontWeight.w700),
-                              softWrap: true,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
                             ),
                             if (hasChildren)
                               Text(

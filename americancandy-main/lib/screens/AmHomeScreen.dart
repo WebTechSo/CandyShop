@@ -454,7 +454,7 @@ class AmHomeScreenState extends State<AmHomeScreen> {
                             child: Column(
                               children: <Widget>[
                                 text(
-                                    ((orderCount <= 0 ? 1 : orderCount))
+                                    (orderCount < 0 ? 0 : orderCount)
                                         .toString()
                                         .padLeft(2, '0'),
                                     textColor: sh_colorPrimary,
@@ -686,7 +686,8 @@ class AmHomeScreenState extends State<AmHomeScreen> {
                   if (snapshot.hasData) {
                     for (final d in snapshot.data!.docs) {
                       final m = d.data() as Map<String, dynamic>;
-                      total += (m['quantity'] ?? 1) as int;
+                      final q = m['quantity'];
+                      total += q is num ? q.toInt() : int.tryParse('$q') ?? 1;
                     }
                   }
                   final badge = total > 0

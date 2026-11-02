@@ -59,7 +59,19 @@ class AmHomeFragmentState extends State<AmHomeFragment> {
   @override
   void initState() {
     super.initState();
+    searchController.addListener(_onSearchTextChanged);
     fetchData();
+  }
+
+  void _onSearchTextChanged() {
+    if (mounted) setState(() {});
+  }
+
+  @override
+  void dispose() {
+    searchController.removeListener(_onSearchTextChanged);
+    searchController.dispose();
+    super.dispose();
   }
 
   fetchData() async {
@@ -75,12 +87,13 @@ class AmHomeFragmentState extends State<AmHomeFragment> {
           ..sort((a, b) =>
               (b.createdAt ?? DateTime(0)).compareTo(a.createdAt ?? DateTime(0)));
     } catch (e) {
-      print('Error loading Firestore products: $e');
+      debugPrint('Error loading Firestore products: $e');
     }
 
     // Load Local JSON products (legacy support)
     // List<AmProductModel> jsonProducts = await loadProducts();
 
+    if (!mounted) return;
     setState(() {
       isLoading = false;
       allProducts = [...firestoreProducts];
@@ -135,13 +148,13 @@ class AmHomeFragmentState extends State<AmHomeFragment> {
             cats.where((c) => c.id != null).map((c) => c.id!).toList();
         List<String> catNames = cats
             .where((c) => c.name != null)
-            .map((c) => c.name!.toLowerCase().trim())
+            .map((c) => (c.name ?? '').toLowerCase().trim())
             .toList();
 
         filtered = filtered.where((p) {
           bool idMatch = p.category != null && catIds.contains(p.category);
           bool nameMatch = p.categoryName != null &&
-              catNames.contains(p.categoryName!.toLowerCase().trim());
+              catNames.contains((p.categoryName ?? '').toLowerCase().trim());
           return idMatch || nameMatch;
         }).toList();
       }
@@ -151,7 +164,7 @@ class AmHomeFragmentState extends State<AmHomeFragment> {
       if (brands.isNotEmpty) {
         final brandNames = brands
             .where((b) => (b.name ?? '').trim().isNotEmpty)
-            .map((b) => b.name!.trim().toLowerCase())
+            .map((b) => (b.name ?? '').trim().toLowerCase())
             .toSet();
         filtered = filtered.where((p) {
           final bn = (p.brand ?? '').trim().toLowerCase();
@@ -184,7 +197,7 @@ class AmHomeFragmentState extends State<AmHomeFragment> {
       if (sizes.isNotEmpty) {
         final sizeNames = sizes
             .where((s) => (s.name ?? '').trim().isNotEmpty)
-            .map((s) => s.name!.trim().toLowerCase())
+            .map((s) => (s.name ?? '').trim().toLowerCase())
             .toSet();
         filtered = filtered.where((p) {
           final sv = (p.variants?.size ?? '').trim().toLowerCase();
@@ -197,7 +210,7 @@ class AmHomeFragmentState extends State<AmHomeFragment> {
       if (flavors.isNotEmpty) {
         final flavorNames = flavors
             .where((f) => (f.name ?? '').trim().isNotEmpty)
-            .map((f) => f.name!.trim().toLowerCase())
+            .map((f) => (f.name ?? '').trim().toLowerCase())
             .toSet();
         filtered = filtered.where((p) {
           final fv = (p.variants?.flavor ?? '').trim().toLowerCase();
@@ -266,7 +279,9 @@ class AmHomeFragmentState extends State<AmHomeFragment> {
       isSearching = true;
       searchResults = countryFilteredProducts
           .where((product) =>
-              product.name!.toLowerCase().contains(query.toLowerCase()))
+              (product.name ?? '')
+                  .toLowerCase()
+                  .contains(query.toLowerCase()))
           .toList();
     });
   }

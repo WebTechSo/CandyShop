@@ -385,6 +385,7 @@ class _CustomerEditScreenState extends State<CustomerEditScreen> {
               10.height,
               if (_billStates.isNotEmpty)
                 DropdownButtonFormField<String>(
+                  isExpanded: true,
                   value: _billStateCtrl.text.trim().isNotEmpty &&
                           _billStates.any((s) =>
                               s.name.toLowerCase() ==
@@ -434,6 +435,7 @@ class _CustomerEditScreenState extends State<CustomerEditScreen> {
               _CRInputField(controller: _billZipCtrl, hint: 'Zip Code *'),
               10.height,
               DropdownButtonFormField<String>(
+                isExpanded: true,
                 value: _billCountryCtrl.value,
                 items: (_variantCountries.isNotEmpty
                         ? _variantCountries.map((e) => e.name).toList()
@@ -520,6 +522,7 @@ class _CustomerEditScreenState extends State<CustomerEditScreen> {
               10.height,
               if (_delStates.isNotEmpty)
                 DropdownButtonFormField<String>(
+                  isExpanded: true,
                   value: _delStateCtrl.text.trim().isNotEmpty &&
                           _delStates.any((s) =>
                               s.name.toLowerCase() ==
@@ -568,6 +571,7 @@ class _CustomerEditScreenState extends State<CustomerEditScreen> {
               _CRInputField(controller: _delZipCtrl, hint: 'Zip Code *'),
               10.height,
               DropdownButtonFormField<String>(
+                isExpanded: true,
                 value: _delCountryCtrl.value,
                 items: (_variantCountries.isNotEmpty
                         ? _variantCountries.map((e) => e.name).toList()
@@ -621,6 +625,7 @@ class _CustomerEditScreenState extends State<CustomerEditScreen> {
                       color: sh_textColorSecondary)),
               8.height,
               DropdownButtonFormField<String>(
+                isExpanded: true,
                 key: ValueKey('status_$_status'),
                 initialValue: _status,
                 items: const [
@@ -730,6 +735,7 @@ class _CRDropdownField extends StatelessWidget {
         final safeItems = items.isNotEmpty ? items : [value];
         final hasValue = safeItems.contains(value);
         return DropdownButtonFormField<String>(
+          isExpanded: true,
           initialValue: hasValue ? value : safeItems.first,
           items: safeItems
               .map((e) => DropdownMenuItem<String>(

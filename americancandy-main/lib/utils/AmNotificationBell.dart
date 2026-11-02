@@ -60,7 +60,7 @@ class AmNotificationBell extends StatelessWidget {
           },
         ),
         if (user == null)
-          badge(0)
+          const SizedBox.shrink()
         else
           StreamBuilder<QuerySnapshot>(
             stream: FirebaseFirestore.instance

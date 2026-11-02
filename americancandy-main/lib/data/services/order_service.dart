@@ -137,7 +137,8 @@ class OrderService {
       // Update product quantities
       for (final update in productUpdates) {
         tx.update(update['ref'] as DocumentReference, {
-          'available_quantity': FieldValue.increment(-(update['qty'] as int)),
+          'available_quantity':
+              FieldValue.increment(-((update['qty'] as num).toInt())),
         });
       }
 
@@ -264,7 +265,10 @@ class OrderService {
         for (final itemDoc in itemsSnap.docs) {
           final data = itemDoc.data();
           final String? productId = data['product_id'];
-          final int quantity = (data['quantity'] ?? 1) as int;
+          final rawQty = data['quantity'];
+          final int quantity = rawQty is num
+              ? rawQty.toInt()
+              : int.tryParse('$rawQty') ?? 1;
 
           if (productId != null && productId.isNotEmpty) {
             final prodRef = _firestore.collection('Products').doc(productId);
@@ -282,7 +286,8 @@ class OrderService {
       // Restock products if cancelled
       for (final restock in productRestocks) {
         tx.update(restock['ref'] as DocumentReference, {
-          'available_quantity': FieldValue.increment(restock['qty'] as int),
+          'available_quantity':
+              FieldValue.increment((restock['qty'] as num).toInt()),
         });
       }
     });
@@ -306,13 +311,13 @@ class OrderService {
         try {
           // Assuming 'products' collection. If it fails, name/image will be null, handled in UI.
           final prodDoc =
-              await _firestore.collection('products').doc(item.productId).get();
+              await _firestore.collection('Products').doc(item.productId).get();
           if (prodDoc.exists) {
             final data = prodDoc.data();
             if (data != null) {
               item.productName = data['name'];
               // Handle image (could be string or list)
-              if (data['images'] != null &&
+              if (data['images'] is List &&
                   (data['images'] as List).isNotEmpty) {
                 var img = (data['images'] as List)[0];
                 if (img is String) {

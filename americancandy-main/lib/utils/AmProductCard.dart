@@ -256,10 +256,13 @@ class _AmProductCardState extends State<AmProductCard> {
                             width: double.infinity,
                             height: double.infinity,
                             errorBuilder: (context, error, stackTrace) {
-                              if (product.images != null &&
-                                  product.images!.isNotEmpty &&
-                                  !product.images!.first!.startsWith('http')) {
-                                final img = product.images!.first!.trim();
+                              final fallbackImg =
+                                  (product.images?.isNotEmpty ?? false)
+                                      ? (product.images!.first).trim()
+                                      : '';
+                              if (fallbackImg.isNotEmpty &&
+                                  !fallbackImg.startsWith('http')) {
+                                final img = fallbackImg;
                                 final imgPath = img.startsWith('images/')
                                     ? img
                                     : "images/sweets/img/products/$img";
@@ -278,10 +281,12 @@ class _AmProductCardState extends State<AmProductCard> {
                             },
                           );
                         }
-                        if (product.images != null &&
-                            product.images!.isNotEmpty &&
-                            !product.images!.first!.startsWith('http')) {
-                          final img = product.images!.first!.trim();
+                        final assetImg = (product.images?.isNotEmpty ?? false)
+                            ? (product.images!.first).trim()
+                            : '';
+                        if (assetImg.isNotEmpty &&
+                            !assetImg.startsWith('http')) {
+                          final img = assetImg;
                           final imgPath = img.startsWith('images/')
                               ? img
                               : "images/sweets/img/products/$img";

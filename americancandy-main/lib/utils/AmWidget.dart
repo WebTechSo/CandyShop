@@ -105,9 +105,9 @@ class ProductHorizontalList extends StatelessWidget {
                             ))
                     else if (list[index].images != null &&
                         list[index].images!.isNotEmpty)
-                      (list[index].images![0].startsWith('http')
+                      (((list[index].images?[0] ?? '').startsWith('http'))
                           ? CachedNetworkImage(
-                              imageUrl: list[index].images![0],
+                              imageUrl: list[index].images?[0] ?? '',
                               width: double.infinity,
                               height: 200,
                               fit: BoxFit.cover,
@@ -124,7 +124,7 @@ class ProductHorizontalList extends StatelessWidget {
                             )
                           : Image.asset(
                               "images/sweets/img/products" +
-                                  list[index].images![0],
+                                  list[index].images?[0] ?? '',
                               width: double.infinity,
                               height: 200,
                               fit: BoxFit.cover,
@@ -149,7 +149,7 @@ class ProductHorizontalList extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: <Widget>[
-                          Text(list[index].name!,
+                          Text(list[index].name ?? '',
                                   maxLines: 2, style: boldTextStyle())
                               .expand(),
                           Row(

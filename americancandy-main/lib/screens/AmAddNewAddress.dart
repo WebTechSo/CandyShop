@@ -69,14 +69,15 @@ class AmAddNewAddressState extends State<AmAddNewAddress> {
       }
     }
     if (widget.addressModel != null) {
-      zipCont.text = widget.addressModel!.zip_code!;
-      address1Cont.text = widget.addressModel!.address!;
+      final editing = widget.addressModel!;
+      zipCont.text = editing.zip_code ?? '';
+      address1Cont.text = editing.address ?? '';
       address2Cont.text = ''; // Combined in address
-      cityCont.text = widget.addressModel!.city!;
-      stateCont.text = widget.addressModel!.state!;
-      countryCont.text = widget.addressModel!.country!;
-      fullNameCont.text = widget.addressModel!.full_name!;
-      phoneNumberCont.text = widget.addressModel!.phone!;
+      cityCont.text = editing.city ?? '';
+      stateCont.text = editing.state ?? '';
+      countryCont.text = editing.country ?? '';
+      fullNameCont.text = editing.full_name ?? '';
+      phoneNumberCont.text = editing.phone ?? '';
       _selectedState.value = stateCont.text;
     }
     final storedCountry = countryCont.text.trim();
@@ -368,13 +369,16 @@ class AmAddNewAddressState extends State<AmAddNewAddress> {
           );
         }
         return DropdownButtonFormField<String>(
+          isExpanded: true,
           value: val.isNotEmpty &&
                   _statesByCountry
                       .any((s) => s.name.toLowerCase() == val.toLowerCase())
               ? val
               : null,
           items: _statesByCountry
-              .map((s) => DropdownMenuItem(value: s.name, child: Text(s.name)))
+              .map((s) => DropdownMenuItem(
+                  value: s.name,
+                  child: Text(s.name, overflow: TextOverflow.ellipsis)))
               .toList(),
           onChanged: (v) {
             final s = v ?? '';
@@ -394,13 +398,16 @@ class AmAddNewAddressState extends State<AmAddNewAddress> {
       valueListenable: _selectedCountry,
       builder: (_, val, __) {
         return DropdownButtonFormField<String>(
+          isExpanded: true,
           value:
               val.isNotEmpty && _variantCountries.any((c) => c.isoCode == val)
                   ? val
                   : null,
           items: _variantCountries
               .map((c) =>
-                  DropdownMenuItem(value: c.isoCode, child: Text(c.name)))
+                  DropdownMenuItem(
+                      value: c.isoCode,
+                      child: Text(c.name, overflow: TextOverflow.ellipsis)))
               .toList(),
           onChanged: (v) async {
             final iso = (v ?? '').trim().toUpperCase();

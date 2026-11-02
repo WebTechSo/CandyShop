@@ -59,7 +59,9 @@ class AmOrderListScreenState extends State<AmOrderListScreen> {
                   child: Text('Error loading orders: ${snapshot.error}'));
             }
             if (!snapshot.hasData || snapshot.data!.isEmpty) {
-              return Container(color: Colors.black);
+              return Center(
+                child: Text('No orders yet', style: boldTextStyle(size: 16)),
+              );
             }
 
             var orders = snapshot.data!;

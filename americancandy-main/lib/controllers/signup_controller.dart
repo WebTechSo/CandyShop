@@ -260,7 +260,7 @@ class SignUpController extends GetxController {
         'updated_at': FieldValue.serverTimestamp(),
       };
 
-      print("📊 Data to save: $userData");
+      debugPrint('Signup user record prepared');
 
       // Save to your specific database
       await _firestore

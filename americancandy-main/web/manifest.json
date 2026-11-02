@@ -1,11 +1,11 @@
 {
-    "name": "american_sweets",
-    "short_name": "american_sweets",
+    "name": "Sweet Stop",
+    "short_name": "Sweet Stop",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "Sweet Stop — American candy, delivered.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

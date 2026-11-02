@@ -118,7 +118,9 @@ class AmOrderItem {
       productId: data['product_id'],
       variation: data['variation'],
       price: (data['price'] is num) ? (data['price'] as num).toDouble() : 0.0,
-      quantity: (data['quantity'] is int) ? data['quantity'] : 1,
+      quantity: (data['quantity'] is num)
+          ? (data['quantity'] as num).toInt()
+          : int.tryParse('${data['quantity']}') ?? 1,
       orderDate: data['order_date'] is Timestamp ? data['order_date'] : null,
       productName: data['product_name'],
       productImage: data['product_image'],

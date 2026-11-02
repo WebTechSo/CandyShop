@@ -224,7 +224,7 @@ class AmViewAllProductscreenState extends State<AmViewAllProductscreen> {
                   p.category != null && catId != null && p.category == catId;
               bool nameMatch = p.categoryName != null &&
                   catName != null &&
-                  p.categoryName!.toLowerCase().trim() == catName;
+                  (p.categoryName ?? '').toLowerCase().trim() == catName;
               return idMatch || nameMatch;
             }).toList();
           } else if (widget.brandName != null) {

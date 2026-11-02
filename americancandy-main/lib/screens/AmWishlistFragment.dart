@@ -134,13 +134,13 @@ class AmWishlistFragmentState extends State<AmWishlistFragment> {
                                       MainAxisAlignment.spaceBetween,
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: <Widget>[
-                                    Text(list[index].name!,
+                                    Text(list[index].name ?? '',
                                             style: boldTextStyle())
                                         .paddingOnly(left: 16.0),
                                     if ((list[index].description ?? '')
                                         .isNotEmpty)
                                       Text(
-                                        list[index].description!,
+                                        list[index].description ?? '',
                                         maxLines: 2,
                                         overflow: TextOverflow.ellipsis,
                                         style: secondaryTextStyle(size: 12),

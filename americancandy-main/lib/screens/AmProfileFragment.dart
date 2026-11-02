@@ -497,6 +497,7 @@ class AmProfileFragmentState extends State<AmProfileFragment> {
                     borderRadius: BorderRadius.all(Radius.circular(32.0)),
                   ),
                   child: DropdownButtonFormField<String>(
+                    isExpanded: true,
                     decoration: InputDecoration(
                       border: InputBorder.none,
                       hintText: "Country of Registration",
@@ -561,6 +562,7 @@ class AmProfileFragmentState extends State<AmProfileFragment> {
                           borderRadius: BorderRadius.all(Radius.circular(32.0)),
                         ),
                         child: DropdownButtonFormField<String>(
+                          isExpanded: true,
                           decoration: InputDecoration(
                             border: InputBorder.none,
                             hintText: "Country",
@@ -625,6 +627,7 @@ class AmProfileFragmentState extends State<AmProfileFragment> {
                           borderRadius: BorderRadius.all(Radius.circular(32.0)),
                         ),
                         child: DropdownButtonFormField<String>(
+                          isExpanded: true,
                           decoration: InputDecoration(
                             border: InputBorder.none,
                             hintText: "Country",

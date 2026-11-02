@@ -682,6 +682,7 @@ class _DropdownField<T> extends StatelessWidget {
     final validValue = items.contains(value) ? value : null;
     
     return DropdownButtonFormField<T>(
+      isExpanded: true,
       value: validValue,
       hint: hint,
       items: List.generate(items.length, (index) {

@@ -34,12 +34,20 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
         .contains(_selectedStatus)) {
       _selectedStatus = 'Pending';
     }
-    _orderItemsFuture = _orderService.getOrderItems(widget.order.id!);
+    final orderId = widget.order.id;
+    _orderItemsFuture = (orderId == null || orderId.isEmpty)
+        ? Future.value(<AmOrderItem>[])
+        : _orderService.getOrderItems(orderId);
   }
 
   Future<void> _updateStatus() async {
+    final orderId = widget.order.id;
+    if (orderId == null || orderId.isEmpty) {
+      toast('Order id is missing');
+      return;
+    }
     try {
-      await _orderService.updateOrderStatus(widget.order.id!, _selectedStatus);
+      await _orderService.updateOrderStatus(orderId, _selectedStatus);
       toast('Order status updated to $_selectedStatus');
       finish(context);
     } catch (e) {
@@ -379,6 +387,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                                   color: sh_colorPrimary)),
                           12.height,
                           DropdownButtonFormField<String>(
+                            isExpanded: true,
                             value: _selectedStatus,
                             items: [
                               'Pending',

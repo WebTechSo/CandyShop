@@ -22,8 +22,6 @@ import 'package:american_sweets/data/services/cart_service.dart';
 import 'package:american_sweets/data/services/wishlist_service.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/painting.dart';
-
 // ignore: must_be_immutable
 class AmProductDetail extends StatefulWidget {
   static String tag = '/AmProductDetail';
@@ -78,8 +76,6 @@ class AmProductDetailState extends State<AmProductDetail> {
   void initState() {
     super.initState();
     _currentProduct = widget.product;
-    _clearAllImageCaches();
-    _evictProductImageCaches(_currentProduct);
     _listenToProduct();
     fetchData();
     fetchPopularProducts();
@@ -118,18 +114,15 @@ class AmProductDetailState extends State<AmProductDetail> {
     return "images/sweets/img/products/$clean";
   }
 
-  void _clearAllImageCaches() {
-    imageCache.clear();
-    imageCache.clearLiveImages();
-  }
-
-  Future<void> _evictProductImageCaches(AmProductModel product) async {
-    for (final url in _imageCandidates(product)) {
-      if (url.startsWith('http')) {
-        try {
-          await CachedNetworkImage.evictFromCache(url);
-        } catch (_) {}
-      }
+  Future<void> _evictChangedImageUrls(
+      AmProductModel previous, AmProductModel next) async {
+    final oldUrls = _imageCandidates(previous).toSet();
+    final newUrls = _imageCandidates(next).toSet();
+    for (final url in oldUrls.difference(newUrls)) {
+      if (!url.startsWith('http')) continue;
+      try {
+        await CachedNetworkImage.evictFromCache(url);
+      } catch (_) {}
     }
   }
 
@@ -141,32 +134,43 @@ class AmProductDetailState extends State<AmProductDetail> {
         .doc(id)
         .snapshots()
         .listen((doc) async {
-      if (!doc.exists) return;
-      final next = AmProductModel.fromSnapshot(doc);
-      await _evictProductImageCaches(next);
-      _clearAllImageCaches();
-      if (!mounted) return;
-      setState(() {
-        _currentProduct = next;
-      });
-      fetchCategoryName();
+      if (!mounted || !doc.exists) return;
+      try {
+        final next = AmProductModel.fromSnapshot(doc);
+        final previous = _currentProduct;
+        await _evictChangedImageUrls(previous, next);
+        if (!mounted) return;
+        setState(() {
+          _currentProduct = next;
+        });
+        fetchCategoryName();
+      } catch (e) {
+        debugPrint('Product listener failed: $e');
+      }
+    }, onError: (Object e) {
+      debugPrint('Product snapshot error: $e');
     });
+  }
+
+  bool _isActiveProduct(AmProductModel p) =>
+      p.status == null || p.status == 'active';
+
+  Future<AmProductModel?> _loadProductById(String id) async {
+    try {
+      final doc = await FirebaseFirestore.instance
+          .collection('Products')
+          .doc(id)
+          .get();
+      if (!doc.exists) return null;
+      final product = AmProductModel.fromSnapshot(doc);
+      return _isActiveProduct(product) ? product : null;
+    } catch (_) {
+      return null;
+    }
   }
 
   fetchPopularProducts() async {
     try {
-      final productsSnap =
-          await FirebaseFirestore.instance.collection('Products').get();
-      final all = productsSnap.docs
-          .map((doc) => AmProductModel.fromQuerySnapshot(doc))
-          .where((p) => p.status == null || p.status == 'active')
-          .toList();
-
-      final Map<String, AmProductModel> byId = {
-        for (final p in all)
-          if (p.id != null && p.id!.isNotEmpty) p.id!: p
-      };
-
       final Map<String, int> qtyByProductId = {};
       try {
         final itemsSnap = await FirebaseFirestore.instance
@@ -179,11 +183,7 @@ class AmProductDetailState extends State<AmProductDetail> {
           final pid = data['product_id']?.toString();
           if (pid == null || pid.isEmpty) continue;
           final q = data['quantity'];
-          final int qty = (q is int)
-              ? q
-              : (q is num)
-              ? q.toInt()
-              : int.tryParse(q.toString()) ?? 1;
+          final int qty = (q is num) ? q.toInt() : int.tryParse('$q') ?? 1;
           qtyByProductId[pid] = (qtyByProductId[pid] ?? 0) + qty;
         }
       } catch (_) {}
@@ -198,52 +198,49 @@ class AmProductDetailState extends State<AmProductDetail> {
         for (final e in entries) {
           if (picked.length >= 2) break;
           final pid = e.key;
-          if (pid == currentId) continue;
-          final p = byId[pid];
+          if (pid == currentId || pickedIds.contains(pid)) continue;
+          final p = await _loadProductById(pid);
           if (p == null) continue;
           picked.add(p);
           pickedIds.add(pid);
         }
       }
 
-      int? catId = _currentProduct.category;
-      String catNameNorm = (categoryName.isNotEmpty
-          ? categoryName
-          : _currentProduct.categoryName)
-          ?.toLowerCase()
-          .trim() ??
-          '';
-      if (picked.length < 2) {
-        final sameCategory = all.where((p) {
-          if (p.id == null || p.id!.isEmpty) return false;
-          if (p.id == currentId) return false;
-          if (pickedIds.contains(p.id)) return false;
-          final idMatch = catId != null && p.category == catId;
-          final nameMatch = catId == null &&
-              (p.categoryName ?? '').toLowerCase().trim() == catNameNorm;
-          return idMatch || nameMatch;
-        }).toList()
-          ..sort((a, b) {
-            final at = a.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
-            final bt = b.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
-            return bt.compareTo(at);
-          });
-
-        final needed = 2 - picked.length;
-        picked.addAll(sameCategory.take(needed));
-        pickedIds.addAll(sameCategory.take(needed).map((e) => e.id!).toList());
+      final int? catId = _currentProduct.category;
+      if (picked.length < 2 && catId != null) {
+        try {
+          final sameSnap = await FirebaseFirestore.instance
+              .collection('Products')
+              .where('category', isEqualTo: catId)
+              .limit(8)
+              .get();
+          for (final doc in sameSnap.docs) {
+            if (picked.length >= 2) break;
+            if (doc.id == currentId || pickedIds.contains(doc.id)) continue;
+            final p = AmProductModel.fromQuerySnapshot(doc);
+            if (!_isActiveProduct(p)) continue;
+            picked.add(p);
+            pickedIds.add(doc.id);
+          }
+        } catch (_) {}
       }
 
       if (picked.length < 2) {
-        final remaining = all
-            .where((p) =>
-        p.id != null &&
-            p.id!.isNotEmpty &&
-            p.id != currentId &&
-            !pickedIds.contains(p.id))
-            .toList()
-          ..shuffle();
-        picked.addAll(remaining.take(2 - picked.length));
+        try {
+          final recentSnap = await FirebaseFirestore.instance
+              .collection('Products')
+              .orderBy('created_at', descending: true)
+              .limit(8)
+              .get();
+          for (final doc in recentSnap.docs) {
+            if (picked.length >= 2) break;
+            if (doc.id == currentId || pickedIds.contains(doc.id)) continue;
+            final p = AmProductModel.fromQuerySnapshot(doc);
+            if (!_isActiveProduct(p)) continue;
+            picked.add(p);
+            pickedIds.add(doc.id);
+          }
+        } catch (_) {}
       }
 
       if (!mounted) return;
@@ -251,7 +248,7 @@ class AmProductDetailState extends State<AmProductDetail> {
         popularProducts = picked.take(2).toList();
       });
     } catch (e) {
-      print("Error loading popular products: $e");
+      debugPrint("Error loading popular products: $e");
     }
   }
 
@@ -316,7 +313,9 @@ class AmProductDetailState extends State<AmProductDetail> {
 
   fetchData() async {
     await fetchCategoryName();
+    if (!mounted) return;
     var reviewsList = await loadProducts();
+    if (!mounted) return;
     setState(() {
       list.clear();
       list.addAll(reviewsList);
@@ -525,9 +524,14 @@ class AmProductDetailState extends State<AmProductDetail> {
                       style: boldTextStyle(size: 24),
                     ),
                     if (product.sku.validate().isNotEmpty)
-                      Text(
-                        'SKU: ${product.sku.validate()}',
-                        style: secondaryTextStyle(size: 14),
+                      Flexible(
+                        child: Text(
+                          'SKU: ${product.sku.validate()}',
+                          style: secondaryTextStyle(size: 14),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.end,
+                        ),
                       ),
                   ],
                 ),
@@ -546,7 +550,7 @@ class AmProductDetailState extends State<AmProductDetail> {
                         color: (product.availableQuantity ?? 0) > 0
                             ? null
                             : (appStore.isDarkModeOn
-                            ? Colors.lightGreenAccent.shade400
+                            ? Colors.redAccent
                             : Colors.redAccent)),
                   ).paddingTop(2),
                 if (product.priceDescription.validate().isNotEmpty)
@@ -578,7 +582,7 @@ class AmProductDetailState extends State<AmProductDetail> {
                         color: (product.availableQuantity ?? 0) > 0
                             ? null
                             : (appStore.isDarkModeOn
-                            ? Colors.lightGreenAccent.shade400
+                            ? Colors.redAccent
                             : Colors.redAccent)),
                   ).paddingTop(2),
                 4.height,
@@ -967,7 +971,7 @@ class AmProductDetailState extends State<AmProductDetail> {
                           overflow: TextOverflow.ellipsis,
                           style: boldTextStyle(
                               color: !inStock && appStore.isDarkModeOn
-                                  ? Colors.lightGreenAccent.shade400
+                                  ? Colors.redAccent
                                   : white)),
                     ),
                   ),
@@ -1021,7 +1025,7 @@ class AmProductDetailState extends State<AmProductDetail> {
                           overflow: TextOverflow.ellipsis,
                           style: boldTextStyle(
                               color: !inStock && appStore.isDarkModeOn
-                                  ? Colors.lightGreenAccent.shade400
+                                  ? Colors.redAccent
                                   : white)),
                     ),
                   ),

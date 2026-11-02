@@ -227,9 +227,9 @@ class AmCartFragmentState extends State<AmCartFragment> {
               product: AmProductModel(
                 id: data['product_id'],
                 name: data['name'],
-                price: (data['price'] is int)
-                    ? (data['price'] as int).toDouble()
-                    : data['price'],
+                price: (data['price'] is num)
+                    ? (data['price'] as num).toDouble()
+                    : double.tryParse('${data['price']}') ?? 0.0,
                 thumbnail: data['image'],
                 sku: data['sku'],
                 variants: AmVariant(
@@ -374,6 +374,8 @@ class AmCartFragmentState extends State<AmCartFragment> {
                                     Text(
                                       "Size: ${product.variants?.size ?? "N/A"} | Flavor: ${product.variants?.flavor ?? "N/A"}",
                                       style: boldTextStyle(size: 14),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
                                     8.height,
                                     QuantityControl(

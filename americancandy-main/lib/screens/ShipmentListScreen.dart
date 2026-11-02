@@ -89,6 +89,7 @@ class _ShipmentListScreenState extends State<ShipmentListScreen> {
                           color: sh_colorPrimary)),
                   12.height,
                   DropdownButtonFormField<String>(
+                    isExpanded: true,
                     value: selected,
                     items: statuses
                         .map((e) => DropdownMenuItem<String>(
@@ -151,6 +152,7 @@ class _ShipmentListScreenState extends State<ShipmentListScreen> {
                                   8.height,
                                   if (modes.length > 1)
                                     DropdownButtonFormField<String>(
+                                      isExpanded: true,
                                       value: adjustMode,
                                       items: modes
                                           .map((e) => DropdownMenuItem<String>(
@@ -510,14 +512,15 @@ class _ShipmentListScreenState extends State<ShipmentListScreen> {
                   final warehouse = (data['warehouse'] ?? '').toString();
                   final statusStr = (data['status'] ?? 'Shipment').toString();
                   final status = _statusFromString(statusStr);
-                  int productsCount = data['productsCount'] is int
-                      ? data['productsCount'] as int
+                  int productsCount = data['productsCount'] is num
+                      ? (data['productsCount'] as num).toInt()
                       : 0;
                   if (productsCount == 0 && data['products'] is List) {
                     final list = data['products'] as List;
                     for (var e in list) {
-                      if (e is Map && e['qty'] is int)
-                        productsCount += e['qty'] as int;
+                      if (e is Map && e['qty'] is num) {
+                        productsCount += (e['qty'] as num).toInt();
+                      }
                     }
                   }
                   return _ShipmentEntry(
@@ -613,11 +616,16 @@ class _ShipmentListScreenState extends State<ShipmentListScreen> {
                                               fontSize: 13,
                                               fontWeight: FontWeight.w600,
                                               color: sh_textColorSecondary))),
-                                  Text('Delivery: ${_fmt(s.delivery)}',
-                                      style: GoogleFonts.workSans(
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.w600,
-                                          color: sh_textColorSecondary)),
+                                  Flexible(
+                                      child: Text(
+                                          'Delivery: ${_fmt(s.delivery)}',
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          textAlign: TextAlign.end,
+                                          style: GoogleFonts.workSans(
+                                              fontSize: 13,
+                                              fontWeight: FontWeight.w600,
+                                              color: sh_textColorSecondary))),
                                 ]),
                                 6.height,
                                 Row(children: [

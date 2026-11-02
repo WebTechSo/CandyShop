@@ -158,7 +158,7 @@ class StripeServices extends GetxController {
     if (secretKey == null || secretKey.isEmpty) {
       throw 'Stripe secret key is missing.';
     }
-    final int amountInCents = (amount * 100).toInt();
+    final int amountInCents = (amount * 100).round();
     final response = await http.post(
       Uri.parse('https://api.stripe.com/v1/payment_intents'),
       headers: {

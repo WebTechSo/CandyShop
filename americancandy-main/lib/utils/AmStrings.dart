@@ -4,7 +4,7 @@ const sh_lbl_log_in = "Login";
 const sh_lbl_sign_up = "Sign Up";
 const sh_lbl_sign_in_with = "Sign In with";
 const sh_lbl_forgot = "Forgot ?";
-const sh_lbl_already_have_a_account = "Already have a account?";
+const sh_lbl_already_have_a_account = "Already have an account?";
 const sh_lbl_enter_the_code_nto_verify_email =
     "Enter the Code to Verify Your Email";
 const sh_lbl_we_have_sent_you_mail_with_verification_code_to =
@@ -13,7 +13,7 @@ const sh_lbl_tep_email = "jonndeo@gmail.com";
 const sh_lbl_did_not_receive = "Didn\'t receive?";
 const sh_lbl_resend_code = "Resend code";
 const sh_lbl_verify = "Verify";
-const sh_lbl_hi_we_re_woobox = "Hi, We\'re Woobox!";
+const sh_lbl_hi_we_re_woobox = "Hi, We\'re Sweet Stop!";
 const sh_lbl_subheading =
     "Taste the stars and stripes. Your favorite American candy, delivered  fast.";
 const sh_lbl_my_order = "My Order";
@@ -136,7 +136,7 @@ const sh_msg_confirmation = "Are you sure you want to delete?";
 
 const sh_error_no_internet = "Oops!! You Are Not Connected To Internet";
 const sh_error_field_required = "Field Required";
-const sh_error_pwd_digit_required = "Maximum 6 digit Required";
+const sh_error_pwd_digit_required = "At least 6 characters required";
 const sh_error_enter_valid_email = "Enter Valid Email";
 const sh_error_password_not_matches = "Password not matches";
 const sh_error_gps_not_enabled = "GPS location is not enabled.";

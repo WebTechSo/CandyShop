@@ -991,7 +991,7 @@ class AmOrderSummaryScreenState extends State<AmOrderSummaryScreen> {
           final String imageSrc =
           (product.thumbnail != null && product.thumbnail!.isNotEmpty)
               ? product.thumbnail!
-              : ((product.images != null && product.images!.isNotEmpty)
+              : ((product.images?.isNotEmpty ?? false)
               ? product.images!.first
               : '');
 

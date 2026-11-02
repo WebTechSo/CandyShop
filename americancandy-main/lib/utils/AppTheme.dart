@@ -79,7 +79,7 @@ class AppThemeData {
       titleTextStyle: primaryTextStyle(color: whiteColor, size: 18),
     ),
     primaryColor: color_primary_black,
-    dividerColor: Color(0xFFDADADA).withOpacity(0.3),
+    dividerColor: Color(0xFFDADADA).withValues(alpha: 0.3),
     primaryColorDark: color_primary_black,
     textSelectionTheme: TextSelectionThemeData(cursorColor: Colors.white),
     hoverColor: Colors.black12,

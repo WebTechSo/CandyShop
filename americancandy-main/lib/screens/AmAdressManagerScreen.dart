@@ -152,16 +152,15 @@ class AmAddressManagerScreenState extends State<AmAddressManagerScreen> {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: <Widget>[
-                                      Text(address.full_name!,
+                                      Text(address.full_name ?? '',
                                           style: boldTextStyle()),
-                                      Text(address.address!,
+                                      Text(address.address ?? '',
                                           style: primaryTextStyle()),
-                                      Text(address.city! + "," + address.state!,
+                                      Text(
+                                          '${address.city ?? ''},${address.state ?? ''}',
                                           style: secondaryTextStyle()),
                                       Text(
-                                          address.country! +
-                                              "," +
-                                              address.zip_code!,
+                                          '${address.country ?? ''},${address.zip_code ?? ''}',
                                           style: secondaryTextStyle()),
                                       16.height,
                                       Text(address.phone.toString(),

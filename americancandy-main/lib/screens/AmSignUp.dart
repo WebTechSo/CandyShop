@@ -439,6 +439,7 @@ class AmSignUpState extends State<AmSignUp> {
           final hasCurrent = current.isNotEmpty &&
               states.any((s) => s.name.toLowerCase() == current.toLowerCase());
           return DropdownButtonFormField<String>(
+            isExpanded: true,
             decoration: InputDecoration(
               hintText: "State *",
               contentPadding:

@@ -292,10 +292,9 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> {
                   final matchesPrice = (p.price ?? 0) >= _price.start &&
                       (p.price ?? 0) <= _price.end;
                   final matchesSearch = _searchQuery.isEmpty ||
-                      (p.name != null &&
-                          p.name!
-                              .toLowerCase()
-                              .contains(_searchQuery.toLowerCase()));
+                      (p.name ?? '')
+                          .toLowerCase()
+                          .contains(_searchQuery.toLowerCase());
 
                   bool matchesStatus = true;
                   if (_selectedFilter == 1)
@@ -354,8 +353,7 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> {
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               _GlowImage(
-                                  path: (p.images != null &&
-                                      p.images!.isNotEmpty)
+                                  path: (p.images?.isNotEmpty ?? false)
                                       ? p.images!.first
                                       : ''),
                               12.width,

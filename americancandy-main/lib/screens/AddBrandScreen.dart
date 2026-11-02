@@ -770,6 +770,7 @@ class _DropdownField<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DropdownButtonFormField<T>(
+      isExpanded: true,
       initialValue: value,
       items: List.generate(items.length, (index) {
         return DropdownMenuItem<T>(

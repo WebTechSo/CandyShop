@@ -175,9 +175,11 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
         
         return InkWell(
           onTap: hasChildren ? () {
+            final id = cat.docId;
+            if (id == null) return;
             setState(() {
-              _expandedState[cat.docId!] = !isExpanded;
-              _updateExpansionState(_categoryTree, cat.docId!, !isExpanded);
+              _expandedState[id] = !isExpanded;
+              _updateExpansionState(_categoryTree, id, !isExpanded);
             });
           } : null,
           borderRadius: BorderRadius.circular(16),
@@ -275,7 +277,8 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
   void _syncExpansionStates(List<CategoryNode> tree) {
     for (var node in tree) {
       if (node.category.docId != null) {
-        node.isExpanded = _expandedState[node.category.docId!] ?? false;
+        node.isExpanded =
+            _expandedState[node.category.docId ?? ''] ?? false;
       }
       _syncExpansionStates(node.children);
     }

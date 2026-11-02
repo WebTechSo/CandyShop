@@ -503,6 +503,7 @@ class _DropdownField extends StatelessWidget {
       valueListenable: valueNotifier,
       builder: (_, value, __) {
         return DropdownButtonFormField<String>(
+          isExpanded: true,
           initialValue: value,
           items: items
               .map((e) => DropdownMenuItem<String>(

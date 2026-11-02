@@ -123,7 +123,7 @@ class AmSignInState extends State<AmSignIn> {
                         keyboardType: TextInputType.emailAddress,
                         autofocus: false,
                         controller: emailCont,
-                        textCapitalization: TextCapitalization.words,
+                        textCapitalization: TextCapitalization.none,
                         style: primaryTextStyle(),
                         validator: (value) {
                           if (value == null || value.isEmpty)
@@ -247,7 +247,7 @@ class AmSignInState extends State<AmSignIn> {
                           shape: RoundedRectangleBorder(
                               borderRadius: new BorderRadius.circular(40.0)),
                           color: sh_colorPrimary,
-                          onPressed: () => _loginUser(),
+                          onPressed: isLoading ? null : () => _loginUser(),
                         ),
                       ),
                       16.height,

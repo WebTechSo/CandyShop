@@ -116,20 +116,22 @@ class AmProductModel {
     if (json['attributes'] != null && json['attributes'] is List) {
       String size = "";
       for (var attr in json['attributes']) {
-        if (attr['name'] == 'Size' &&
-            attr['options'] != null &&
+        if (attr is Map &&
+            attr['name'] == 'Size' &&
+            attr['options'] is List &&
             (attr['options'] as List).isNotEmpty) {
           size = (attr['options'] as List)[0].toString();
         }
       }
       vars = AmVariant(size: size);
-    } else if (json['variants'] != null) {
-      vars = AmVariant.fromJson(json['variants']);
+    } else if (json['variants'] is Map) {
+      vars = _parseVariant(json['variants']);
     }
 
     int catId = 18; // Default to Sweets
     if (json['categories'] != null && json['categories'] is List) {
       for (var cat in json['categories']) {
+        if (cat is! Map) continue;
         String name = cat['name'].toString().toLowerCase();
         if (name == 'chocolates')
           catId = 45;
@@ -190,16 +192,10 @@ class AmProductModel {
       brand: data['brand'],
       category: catId,
       categoryName: catName,
-      createdAt: data['created_at'] != null
-          ? (data['created_at'] as Timestamp).toDate()
-          : null,
+      createdAt: _parseCreatedAt(data['created_at']),
       currency: data['currency'],
       description: data['description'],
-      images: data['images'] != null
-          ? (data['images'] as List)
-              .map((e) => _cleanUrl(e.toString()))
-              .toList()
-          : [],
+      images: _parseImageList(data['images']),
       ingredients: data['ingredients'],
       name: data['name'],
       price: _parsePrice(data['price']),
@@ -208,9 +204,7 @@ class AmProductModel {
       priceDescription: data['priceDescription'],
       sku: data['sku'],
       thumbnail: _cleanUrl(data['thumbnail']?.toString() ?? ''),
-      variants: data['variants'] != null
-          ? AmVariant.fromJson(data['variants'])
-          : null,
+      variants: _parseVariant(data['variants']),
       availableQuantity: data['available_quantity'] != null
           ? int.tryParse(data['available_quantity'].toString())
           : null,
@@ -237,16 +231,10 @@ class AmProductModel {
       brand: data['brand'],
       category: catId,
       categoryName: catName,
-      createdAt: data['created_at'] != null
-          ? (data['created_at'] as Timestamp).toDate()
-          : null,
+      createdAt: _parseCreatedAt(data['created_at']),
       currency: data['currency'],
       description: data['description'],
-      images: data['images'] != null
-          ? (data['images'] as List)
-              .map((e) => _cleanUrl(e.toString()))
-              .toList()
-          : [],
+      images: _parseImageList(data['images']),
       ingredients: data['ingredients'],
       name: data['name'],
       price: _parsePrice(data['price']),
@@ -255,15 +243,32 @@ class AmProductModel {
       priceDescription: data['priceDescription'],
       sku: data['sku'],
       thumbnail: _cleanUrl(data['thumbnail']?.toString() ?? ''),
-      variants: data['variants'] != null
-          ? AmVariant.fromJson(data['variants'])
-          : null,
+      variants: _parseVariant(data['variants']),
       availableQuantity: data['available_quantity'] != null
           ? int.tryParse(data['available_quantity'].toString())
           : null,
       status: data['product_status'] ?? 'active',
       featured: _parseBool(data['featured']),
     );
+  }
+
+  static DateTime? _parseCreatedAt(dynamic value) {
+    if (value is Timestamp) return value.toDate();
+    if (value is DateTime) return value;
+    return null;
+  }
+
+  static List<String> _parseImageList(dynamic value) {
+    if (value is! List) return [];
+    return value.map((e) => _cleanUrl(e?.toString() ?? '')).toList();
+  }
+
+  static AmVariant? _parseVariant(dynamic value) {
+    if (value is Map<String, dynamic>) return AmVariant.fromJson(value);
+    if (value is Map) {
+      return AmVariant.fromJson(Map<String, dynamic>.from(value));
+    }
+    return null;
   }
 
   static String _cleanUrl(String url) {

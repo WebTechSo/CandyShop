@@ -80,10 +80,11 @@ class _PaymentSetupScreenState extends State<PaymentSetupScreen> {
                           controller: _nameController,
                           decoration: const InputDecoration(
                               labelText: 'Name (e.g. Stripe)'),
-                          validator: (v) => v!.isEmpty ? 'Required' : null,
+                          validator: (v) => (v ?? '').isEmpty ? 'Required' : null,
                         ),
                         16.height,
                         DropdownButtonFormField<String>(
+                          isExpanded: true,
                           value: _paymentMode,
                           items: ['Test', 'Live']
                               .map((e) =>
@@ -101,13 +102,13 @@ class _PaymentSetupScreenState extends State<PaymentSetupScreen> {
                           controller: _testSecretController,
                           decoration: const InputDecoration(
                               labelText: 'Test Secret Key'),
-                          validator: (v) => v!.isEmpty ? 'Required' : null,
+                          validator: (v) => (v ?? '').isEmpty ? 'Required' : null,
                         ),
                         TextFormField(
                           controller: _testPublishableController,
                           decoration: const InputDecoration(
                               labelText: 'Test Publishable Key'),
-                          validator: (v) => v!.isEmpty ? 'Required' : null,
+                          validator: (v) => (v ?? '').isEmpty ? 'Required' : null,
                         ),
                         16.height,
                         Text('Live Keys',
@@ -117,13 +118,13 @@ class _PaymentSetupScreenState extends State<PaymentSetupScreen> {
                           controller: _liveSecretController,
                           decoration: const InputDecoration(
                               labelText: 'Live Secret Key'),
-                          validator: (v) => v!.isEmpty ? 'Required' : null,
+                          validator: (v) => (v ?? '').isEmpty ? 'Required' : null,
                         ),
                         TextFormField(
                           controller: _livePublishableController,
                           decoration: const InputDecoration(
                               labelText: 'Live Publishable Key'),
-                          validator: (v) => v!.isEmpty ? 'Required' : null,
+                          validator: (v) => (v ?? '').isEmpty ? 'Required' : null,
                         ),
                       ] else if (_type == 'cod') ...[
                         SwitchListTile(
@@ -137,30 +138,30 @@ class _PaymentSetupScreenState extends State<PaymentSetupScreen> {
                           controller: _bankNameCtrl,
                           decoration:
                               const InputDecoration(labelText: 'Bank Name'),
-                          validator: (v) => v!.isEmpty ? 'Required' : null,
+                          validator: (v) => (v ?? '').isEmpty ? 'Required' : null,
                         ),
                         TextFormField(
                           controller: _accountHolderCtrl,
                           decoration: const InputDecoration(
                               labelText: 'Account Holder Name'),
-                          validator: (v) => v!.isEmpty ? 'Required' : null,
+                          validator: (v) => (v ?? '').isEmpty ? 'Required' : null,
                         ),
                         TextFormField(
                           controller: _ibanCtrl,
                           decoration: const InputDecoration(labelText: 'IBAN'),
-                          validator: (v) => v!.isEmpty ? 'Required' : null,
+                          validator: (v) => (v ?? '').isEmpty ? 'Required' : null,
                         ),
                         TextFormField(
                           controller: _bicCtrl,
                           decoration:
                               const InputDecoration(labelText: 'BIC / SWIFT'),
-                          validator: (v) => v!.isEmpty ? 'Required' : null,
+                          validator: (v) => (v ?? '').isEmpty ? 'Required' : null,
                         ),
                         TextFormField(
                           controller: _payRefCtrl,
                           decoration: const InputDecoration(
                               labelText: 'Payment Reference Instruction'),
-                          validator: (v) => v!.isEmpty ? 'Required' : null,
+                          validator: (v) => (v ?? '').isEmpty ? 'Required' : null,
                         ),
                         12.height,
                         // Optional fields

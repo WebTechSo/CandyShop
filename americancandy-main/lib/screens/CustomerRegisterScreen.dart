@@ -429,6 +429,7 @@ class _CustomerRegisterScreenState extends State<CustomerRegisterScreen> {
                           hint: 'Business Name *'),
                       10.height,
                       DropdownButtonFormField<String>(
+                        isExpanded: true,
                         value: _countryRegCtrl.value,
                         items: (_variantCountries.isNotEmpty
                                 ? _variantCountries.map((e) => e.name).toList()
@@ -516,6 +517,7 @@ class _CustomerRegisterScreenState extends State<CustomerRegisterScreen> {
                       10.height,
                       if (_billStates.isNotEmpty)
                         DropdownButtonFormField<String>(
+                          isExpanded: true,
                           value: _billStateCtrl.text.trim().isNotEmpty &&
                                   _billStates.any((s) =>
                                       s.name.toLowerCase() ==
@@ -567,6 +569,7 @@ class _CustomerRegisterScreenState extends State<CustomerRegisterScreen> {
                       _InputField(controller: _billZipCtrl, hint: 'Zip Code *'),
                       10.height,
                       DropdownButtonFormField<String>(
+                        isExpanded: true,
                         value: _billCountryCtrl.value,
                         items: (_variantCountries.isNotEmpty
                                 ? _variantCountries.map((e) => e.name).toList()
@@ -647,6 +650,7 @@ class _CustomerRegisterScreenState extends State<CustomerRegisterScreen> {
                       10.height,
                       if (_delStates.isNotEmpty)
                         DropdownButtonFormField<String>(
+                          isExpanded: true,
                           value: _delStateCtrl.text.trim().isNotEmpty &&
                                   _delStates.any((s) =>
                                       s.name.toLowerCase() ==
@@ -696,6 +700,7 @@ class _CustomerRegisterScreenState extends State<CustomerRegisterScreen> {
                       _InputField(controller: _delZipCtrl, hint: 'Zip Code *'),
                       10.height,
                       DropdownButtonFormField<String>(
+                        isExpanded: true,
                         value: _delCountryCtrl.value,
                         items: (_variantCountries.isNotEmpty
                                 ? _variantCountries.map((e) => e.name).toList()
@@ -893,6 +898,7 @@ class _CRDropdownField extends StatelessWidget {
       valueListenable: vn,
       builder: (_, value, __) {
         return DropdownButtonFormField<String>(
+          isExpanded: true,
           initialValue: value,
           items: items
               .map((e) => DropdownMenuItem<String>(

@@ -487,6 +487,7 @@ class _AdminSettingScreenState extends State<AdminSettingScreen> {
                   8.height,
                   if (_countries.isNotEmpty)
                     DropdownButtonFormField<String>(
+                      isExpanded: true,
                       value: _countries.contains(_defaultCountry)
                           ? _defaultCountry
                           : _countries.first,
@@ -577,6 +578,7 @@ class _AdminSettingScreenState extends State<AdminSettingScreen> {
                   _buildTextField('Button Text', _offerButtonCtrl),
                   12.height,
                   DropdownButtonFormField<String>(
+                    isExpanded: true,
                     value: _offerRoute,
                     items: const [
                       DropdownMenuItem(
