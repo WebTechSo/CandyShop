@@ -44,15 +44,12 @@ class AmSignUpState extends State<AmSignUp> {
 
     final controller = SignUpController.instance;
     return Scaffold(
-      body: Stack(
-        children: [
-          SingleChildScrollView(
-            child: Container(
-              width: width,
-              height: height,
-              child: Stack(
-                alignment: Alignment.center,
-                children: <Widget>[
+      body: SizedBox(
+        width: width,
+        height: height,
+        child: Stack(
+          alignment: Alignment.center,
+          children: <Widget>[
                   // Keep flags same as you requested
                   Align(
                     alignment: Alignment.topLeft,
@@ -91,10 +88,9 @@ class AmSignUpState extends State<AmSignUp> {
                     ),
                   ),
 
-                  // Form content
-                  Padding(
-                    padding: const EdgeInsets.all(24.0),
+                  SafeArea(
                     child: SingleChildScrollView(
+                      padding: const EdgeInsets.all(24.0),
                       child: Form(
                         key: controller.signupFormKey,
                         autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -348,10 +344,6 @@ class AmSignUpState extends State<AmSignUp> {
                       ),
                     ),
                   ),
-                ],
-              ),
-            ),
-          ),
           Obx(() => controller.isLoading.value
               ? Container(
                   color: Colors.black54,
@@ -360,7 +352,8 @@ class AmSignUpState extends State<AmSignUp> {
                   ),
                 )
               : SizedBox()),
-        ],
+          ],
+        ),
       ),
     );
   }
