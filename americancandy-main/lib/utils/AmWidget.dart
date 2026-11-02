@@ -124,7 +124,7 @@ class ProductHorizontalList extends StatelessWidget {
                             )
                           : Image.asset(
                               "images/sweets/img/products" +
-                                  list[index].images?[0] ?? '',
+                                  (list[index].images?[0] ?? ''),
                               width: double.infinity,
                               height: 200,
                               fit: BoxFit.cover,
