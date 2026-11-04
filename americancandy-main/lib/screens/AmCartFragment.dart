@@ -604,11 +604,7 @@ class AmCartFragmentState extends State<AmCartFragment> {
                 left: 0,
                 right: 0,
                 bottom: 0,
-                child: StreamBuilder<QuerySnapshot>(
-                  stream: _cartStream,
-                  builder: (context, snapshot) {
-                    final hasItems = snapshot.hasData && snapshot.data!.docs.isNotEmpty;
-                    return Container(
+                child: Container(
                       decoration: BoxDecoration(
                         color: context.cardColor,
                         boxShadow: [
@@ -629,7 +625,7 @@ class AmCartFragmentState extends State<AmCartFragment> {
                         width: double.infinity,
                         height: width < 360 ? 45 : 50, // Responsive height for smaller screens
                         child: ElevatedButton(
-                          onPressed: (hasItems)
+                          onPressed: cartList.isNotEmpty
                               ? () {
                                   if (!mounted) return;
                                   WidgetsBinding.instance
@@ -661,9 +657,7 @@ class AmCartFragmentState extends State<AmCartFragment> {
                           ),
                         ),
                       ),
-                    );
-                  },
-                ),
+                    ),
               ),
             ],
           );

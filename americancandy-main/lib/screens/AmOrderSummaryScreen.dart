@@ -116,6 +116,10 @@ class AmOrderSummaryScreenState extends State<AmOrderSummaryScreen> {
       } catch (e) {
         print("Error fetching user profile: $e");
       }
+      final authEmail = (user.email ?? '').trim();
+      if (contactEmail.trim().isEmpty && authEmail.isNotEmpty) {
+        contactEmail = authEmail;
+      }
     }
 
     // Subscribe to Cart Stream
