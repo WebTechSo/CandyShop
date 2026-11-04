@@ -199,7 +199,15 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                                   color: sh_textColorSecondary)),
                           4.height,
                           Text(
-                              '${widget.order.shippingAddress?.address ?? ''}, ${widget.order.shippingAddress?.city ?? ''}, ${widget.order.shippingAddress?.state ?? ''} ${widget.order.shippingAddress?.zip_code ?? ''}',
+                              [
+                                widget.order.shippingAddress?.address ?? '',
+                                widget.order.shippingAddress?.city ?? '',
+                                widget.order.shippingAddress?.state ?? '',
+                                widget.order.shippingAddress?.zip_code ?? '',
+                              ]
+                                  .map((part) => part.trim())
+                                  .where((part) => part.isNotEmpty)
+                                  .join(', '),
                               style: GoogleFonts.workSans(
                                   fontSize: 13,
                                   fontWeight: FontWeight.w600,

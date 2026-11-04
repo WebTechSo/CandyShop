@@ -54,8 +54,8 @@ class AmOrderSummaryScreenState extends State<AmOrderSummaryScreen> {
   var currentIndex = 0;
   Timer? timer;
   var isLoaded = false;
-  ShippingOption selectedShipping = ShippingOption.fastPaid;
-  String selectedPaymentMethod = "Cash";
+  ShippingOption selectedShipping = ShippingOption.normalFree;
+  String selectedPaymentMethod = "Cash on Delivery";
   StreamSubscription? _cartSubscription;
 
   // Pricing and VAT
@@ -253,7 +253,6 @@ class AmOrderSummaryScreenState extends State<AmOrderSummaryScreen> {
       return sum + price * qty * rate;
     });
     totalAmount = subtotal + shippingCost + (_includeVat ? vatAmount : 0.0);
-    if (mounted) setState(() {});
   }
 
   void _updateQuantity(AmProductModel product, int newQty) {
@@ -562,9 +561,11 @@ class AmOrderSummaryScreenState extends State<AmOrderSummaryScreen> {
                       pw.Text((shipping.full_name ?? contactName).trim()),
                       if ((shipping.address ?? '').trim().isNotEmpty)
                         pw.Text((shipping.address ?? '').trim()),
-                      pw.Text(
-                          '${(shipping.city ?? '').trim()} ${(shipping.state ?? '').trim()} ${(shipping.zip_code ?? '').trim()}'
-                              .trim()),
+                      pw.Text([
+                        (shipping.city ?? '').trim(),
+                        (shipping.state ?? '').trim(),
+                        (shipping.zip_code ?? '').trim(),
+                      ].where((part) => part.isNotEmpty).join(' ')),
                       pw.Text((shipping.country ?? '').trim()),
                     ]),
                 pw.Column(
@@ -1475,21 +1476,24 @@ class AmOrderSummaryScreenState extends State<AmOrderSummaryScreen> {
                 ),
               ...enabled.map((m) {
                 final label = m.type == 'cod' ? 'Cash on Delivery' : 'Bank Transfer';
-                return RadioListTile<String>(
-                  title: Text(label, style: primaryTextStyle()),
-                  value: label,
-                  groupValue: selectedPaymentMethod,
-                  onChanged: (String? value) {
-                    if (value != null) {
-                      setState(() {
-                        selectedPaymentMethod = value;
-                        // Store reference when user actually interacts, not in builder
-                        _bankAdmin = bankAdmin;
-                      });
-                    }
-                  },
-                  dense: true,
-                  fillColor: WidgetStateProperty.all(sh_colorPrimary),
+                return Material(
+                  type: MaterialType.transparency,
+                  child: RadioListTile<String>(
+                    title: Text(label, style: primaryTextStyle()),
+                    value: label,
+                    groupValue: selectedPaymentMethod,
+                    onChanged: (String? value) {
+                      if (value != null) {
+                        setState(() {
+                          selectedPaymentMethod = value;
+                          // Store reference when user actually interacts, not in builder
+                          _bankAdmin = bankAdmin;
+                        });
+                      }
+                    },
+                    dense: true,
+                    fillColor: WidgetStateProperty.all(sh_colorPrimary),
+                  ),
                 );
               }).toList(),
               if (selectedPaymentMethod == 'Bank Transfer') ...[

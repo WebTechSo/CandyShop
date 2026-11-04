@@ -157,10 +157,20 @@ class AmAddressManagerScreenState extends State<AmAddressManagerScreen> {
                                       Text(address.address ?? '',
                                           style: primaryTextStyle()),
                                       Text(
-                                          '${address.city ?? ''},${address.state ?? ''}',
+                                          [
+                                            (address.city ?? '').trim(),
+                                            (address.state ?? '').trim(),
+                                          ]
+                                              .where((part) => part.isNotEmpty)
+                                              .join(', '),
                                           style: secondaryTextStyle()),
                                       Text(
-                                          '${address.country ?? ''},${address.zip_code ?? ''}',
+                                          [
+                                            (address.country ?? '').trim(),
+                                            (address.zip_code ?? '').trim(),
+                                          ]
+                                              .where((part) => part.isNotEmpty)
+                                              .join(', '),
                                           style: secondaryTextStyle()),
                                       16.height,
                                       Text(address.phone.toString(),

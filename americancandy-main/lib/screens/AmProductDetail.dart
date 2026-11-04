@@ -22,6 +22,7 @@ import 'package:american_sweets/data/services/cart_service.dart';
 import 'package:american_sweets/data/services/wishlist_service.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:vibration/vibration.dart';
 // ignore: must_be_immutable
 class AmProductDetail extends StatefulWidget {
   static String tag = '/AmProductDetail';
@@ -947,6 +948,14 @@ class AmProductDetailState extends State<AmProductDetail> {
                         ? null
                         : () async {
                       if (product.id != null) {
+                        try {
+                          final hasVibrator = await Vibration.hasVibrator();
+                          if (hasVibrator) {
+                            await Vibration.vibrate(pattern: [0, 100]);
+                          }
+                        } catch (e) {
+                          print('vibration not supported: $e');
+                        }
                         try {
                           await CartService().addToCart(product,
                               quantity: productQuantity);

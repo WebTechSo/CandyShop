@@ -194,7 +194,21 @@ class AmOrderDetailScreenState extends State<AmOrderDetailScreen> {
                       Text("Shipping Address:", style: secondaryTextStyle()),
                       4.height,
                       Text(
-                        "${widget.order!.shippingAddress!.address}\n${widget.order!.shippingAddress!.city}, ${widget.order!.shippingAddress!.state} ${widget.order!.shippingAddress!.zip_code}\n${widget.order!.shippingAddress!.country}",
+                        [
+                          widget.order!.shippingAddress!.address ?? '',
+                          [
+                            widget.order!.shippingAddress!.city ?? '',
+                            widget.order!.shippingAddress!.state ?? '',
+                            widget.order!.shippingAddress!.zip_code ?? '',
+                          ]
+                              .map((part) => part.trim())
+                              .where((part) => part.isNotEmpty)
+                              .join(', '),
+                          widget.order!.shippingAddress!.country ?? '',
+                        ]
+                            .map((part) => part.trim())
+                            .where((part) => part.isNotEmpty)
+                            .join('\n'),
                         style: primaryTextStyle(),
                       ),
                     ],

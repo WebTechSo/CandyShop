@@ -31,7 +31,6 @@ class AmAddNewAddressState extends State<AmAddNewAddress> {
   var fullNameCont = TextEditingController();
   var zipCont = TextEditingController();
   var cityCont = TextEditingController();
-  var stateCont = TextEditingController();
   var address1Cont = TextEditingController();
   var address2Cont = TextEditingController();
   var phoneNumberCont = TextEditingController();
@@ -40,9 +39,7 @@ class AmAddNewAddressState extends State<AmAddNewAddress> {
   final _formKey = GlobalKey<FormState>();
   AutovalidateMode _autovalidateMode = AutovalidateMode.disabled;
   final ValueNotifier<String> _selectedCountry = ValueNotifier<String>('');
-  final ValueNotifier<String> _selectedState = ValueNotifier<String>('');
   List<csc.Country> _variantCountries = [];
-  List<csc.State> _statesByCountry = [];
   String _countryPhonePrefix = '';
 
   void onTextChanged(String value) {
@@ -64,7 +61,6 @@ class AmAddNewAddressState extends State<AmAddNewAddress> {
       if (def != null) {
         _selectedCountry.value = def.isoCode;
         countryCont.text = def.name;
-        await _loadStatesForCountry(def.isoCode);
         _updatePhonePrefix(def.isoCode);
       }
     }
@@ -74,11 +70,9 @@ class AmAddNewAddressState extends State<AmAddNewAddress> {
       address1Cont.text = editing.address ?? '';
       address2Cont.text = ''; // Combined in address
       cityCont.text = editing.city ?? '';
-      stateCont.text = editing.state ?? '';
       countryCont.text = editing.country ?? '';
       fullNameCont.text = editing.full_name ?? '';
       phoneNumberCont.text = editing.phone ?? '';
-      _selectedState.value = stateCont.text;
     }
     final storedCountry = countryCont.text.trim();
     if (storedCountry.isNotEmpty) {
@@ -107,7 +101,6 @@ class AmAddNewAddressState extends State<AmAddNewAddress> {
     }
 
     if (_selectedCountry.value.isNotEmpty) {
-      await _loadStatesForCountry(_selectedCountry.value);
       _updatePhonePrefix(_selectedCountry.value);
     }
   }
@@ -148,9 +141,6 @@ class AmAddNewAddressState extends State<AmAddNewAddress> {
             addressLine.isNotEmpty ? addressLine : address1Cont.text;
         cityCont.text =
             (place.locality ?? '').isNotEmpty ? place.locality! : cityCont.text;
-        stateCont.text = (place.administrativeArea ?? '').isNotEmpty
-            ? place.administrativeArea!
-            : stateCont.text;
         countryCont.text = (place.country ?? '').isNotEmpty
             ? place.country!
             : countryCont.text;
@@ -170,22 +160,6 @@ class AmAddNewAddressState extends State<AmAddNewAddress> {
       setState(() => _variantCountries = list);
     } catch (e) {
       print('Failed to load variant_countries: $e');
-    }
-  }
-
-  Future<void> _loadStatesForCountry(String country) async {
-    final iso = country.trim().toUpperCase();
-    if (iso.isEmpty) {
-      setState(() => _statesByCountry = []);
-      return;
-    }
-    try {
-      final states =
-          await AdminCountryService.instance.getStatesForCountryIso(iso);
-      if (!mounted) return;
-      setState(() => _statesByCountry = states);
-    } catch (e) {
-      print('Failed to load states for $country: $e');
     }
   }
 
@@ -216,7 +190,7 @@ class AmAddNewAddressState extends State<AmAddNewAddress> {
       model.address = fullAddress;
 
       model.city = cityCont.text;
-      model.state = stateCont.text;
+      model.state = '';
       model.country = countryCont.text;
       model.zip_code = zipCont.text;
       model.phone = phoneNumberCont.text;
@@ -346,54 +320,6 @@ class AmAddNewAddressState extends State<AmAddNewAddress> {
       decoration: formFieldDecoration(sh_hint_city + " *"),
     );
 
-    final state = ValueListenableBuilder<String>(
-      valueListenable: _selectedState,
-      builder: (_, val, __) {
-        if (_statesByCountry.isEmpty) {
-          return TextFormField(
-            autovalidateMode: _autovalidateMode,
-            onFieldSubmitted: (term) => FocusScope.of(context).nextFocus(),
-            controller: stateCont,
-            keyboardType: TextInputType.text,
-            textCapitalization: TextCapitalization.words,
-            style: primaryTextStyle(),
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'State is required';
-              }
-              return null;
-            },
-            autofocus: false,
-            textInputAction: TextInputAction.next,
-            decoration: formFieldDecoration(sh_hint_state + " *"),
-          );
-        }
-        return DropdownButtonFormField<String>(
-          isExpanded: true,
-          value: val.isNotEmpty &&
-                  _statesByCountry
-                      .any((s) => s.name.toLowerCase() == val.toLowerCase())
-              ? val
-              : null,
-          items: _statesByCountry
-              .map((s) => DropdownMenuItem(
-                  value: s.name,
-                  child: Text(s.name, overflow: TextOverflow.ellipsis)))
-              .toList(),
-          onChanged: (v) {
-            final s = v ?? '';
-            _selectedState.value = s;
-            stateCont.text = s;
-          },
-          validator: (v) {
-            if ((v ?? '').trim().isEmpty) return 'State is required';
-            return null;
-          },
-          decoration: formFieldDecoration(sh_hint_state + " *"),
-        );
-      },
-    );
-
     final country = ValueListenableBuilder<String>(
       valueListenable: _selectedCountry,
       builder: (_, val, __) {
@@ -416,9 +342,6 @@ class AmAddNewAddressState extends State<AmAddNewAddress> {
                 .where((c) => c.isoCode.toUpperCase() == iso)
                 .toList();
             countryCont.text = match.isNotEmpty ? match.first.name : '';
-            _selectedState.value = '';
-            stateCont.text = '';
-            await _loadStatesForCountry(iso);
             _updatePhonePrefix(iso);
           },
           validator: (v) {
@@ -517,8 +440,6 @@ class AmAddNewAddressState extends State<AmAddNewAddress> {
         address1,
         Row(children: <Widget>[
           Expanded(child: country),
-          SizedBox(width: spacing_standard_new),
-          Expanded(child: state),
         ]),
         Row(children: <Widget>[
           Expanded(child: city),

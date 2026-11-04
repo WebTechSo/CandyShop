@@ -147,12 +147,12 @@ class AmCartFragment extends StatefulWidget {
 
 class AmCartFragmentState extends State<AmCartFragment> {
   bool includeVat = getBoolAsync('include_vat', defaultValue: true);
-  final Map<String, bool> _isHovered = {}; // Track hover state for each item
+  late final Stream<QuerySnapshot> _cartStream;
 
   @override
   void initState() {
     super.initState();
-    // No fetch needed, StreamBuilder handles it
+    _cartStream = CartService().getCartStream();
   }
 
   Future<void> _vibrate() async {
@@ -192,7 +192,7 @@ class AmCartFragmentState extends State<AmCartFragment> {
 
     return Scaffold(
       body: StreamBuilder<QuerySnapshot>(
-        stream: CartService().getCartStream(),
+        stream: _cartStream,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
@@ -281,33 +281,15 @@ class AmCartFragmentState extends State<AmCartFragment> {
               final cartProduct = cartList[index];
               final product = cartProduct.product;
 
-              return MouseRegion(
-                onEnter: (_) {
-                  setState(() {
-                    _isHovered[product.id ?? ''] = true;
-                  });
-                },
-                onExit: (_) {
-                  setState(() {
-                    _isHovered[product.id ?? ''] = false;
-                  });
-                },
-                child: Container(
+              return Container(
                   margin: EdgeInsets.only(
                     left: spacing_standard_new,
                     right: spacing_standard_new,
                     top: spacing_standard_new,
                   ),
                   decoration: BoxDecoration(
-                    color: _isHovered[product.id ?? ''] == true 
-                        ? context.cardColor.withValues(alpha: 0.9)
-                        : context.cardColor,
-                    border: Border.all(
-                      color: _isHovered[product.id ?? ''] == true 
-                          ? sh_colorPrimary.withValues(alpha: 0.3)
-                          : Colors.transparent,
-                      width: 1,
-                    ),
+                    color: context.cardColor,
+                    border: Border.all(color: Colors.transparent, width: 1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(
@@ -489,8 +471,7 @@ class AmCartFragmentState extends State<AmCartFragment> {
                       )
                     ],
                   ),
-                ),
-              );
+                );
             },
           );
 
@@ -624,7 +605,7 @@ class AmCartFragmentState extends State<AmCartFragment> {
                 right: 0,
                 bottom: 0,
                 child: StreamBuilder<QuerySnapshot>(
-                  stream: CartService().getCartStream(),
+                  stream: _cartStream,
                   builder: (context, snapshot) {
                     final hasItems = snapshot.hasData && snapshot.data!.docs.isNotEmpty;
                     return Container(
