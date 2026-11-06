@@ -2,6 +2,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:nb_utils/nb_utils.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:american_sweets/utils/AmColors.dart';
 import 'package:american_sweets/utils/AmConstant.dart';
 import 'package:american_sweets/utils/AmStrings.dart';
@@ -446,6 +450,145 @@ class _OrderManagementScreenState extends State<OrderManagementScreen> {
   }
 }
 
+class _OrderPdfButton extends StatefulWidget {
+  final AmOrder order;
+  const _OrderPdfButton({required this.order});
+
+  @override
+  State<_OrderPdfButton> createState() => _OrderPdfButtonState();
+}
+
+class _OrderPdfButtonState extends State<_OrderPdfButton> {
+  bool _busy = false;
+
+  Future<void> _download() async {
+    if (_busy) return;
+    setState(() => _busy = true);
+    try {
+      final url = (widget.order.invoiceUrl ?? '').trim();
+      final uri = Uri.tryParse(url);
+      if (uri != null && uri.hasScheme) {
+        try {
+          final opened =
+              await launchUrl(uri, mode: LaunchMode.externalApplication);
+          if (opened) return;
+        } catch (_) {
+          // fall through and build the PDF from the order instead
+        }
+      }
+      await _shareGeneratedPdf();
+    } catch (e) {
+      toast('Unable to download PDF');
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _shareGeneratedPdf() async {
+    final order = widget.order;
+    final itemsSnap = await FirebaseFirestore.instance
+        .collection('order_items')
+        .where('order_id', isEqualTo: order.id)
+        .get();
+    final rows = itemsSnap.docs.map((doc) {
+      final data = doc.data();
+      final name = (data['product_name'] ?? 'Product').toString();
+      final qty = int.tryParse((data['quantity'] ?? 1).toString()) ?? 1;
+      final price = (data['price'] is num) ? (data['price'] as num).toDouble() : 0.0;
+      return [name, '$qty', '£${price.toStringAsFixed(2)}', '£${(price * qty).toStringAsFixed(2)}'];
+    }).toList();
+
+    final address = order.shippingAddress;
+    final shipTo = [
+      address?.address ?? '',
+      address?.city ?? '',
+      address?.state ?? '',
+      address?.zip_code ?? '',
+      address?.country ?? '',
+    ].map((part) => part.trim()).where((part) => part.isNotEmpty).join(', ');
+    final code = order.orderCode ?? order.id ?? 'order';
+    final date = order.orderDate?.toDate();
+    final dateStr = date == null
+        ? ''
+        : '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
+    final subtotal = order.itemsSubtotal ??
+        rows.fold<double>(0, (sum, row) {
+          final amount = row.last.replaceAll('£', '');
+          return sum + (double.tryParse(amount) ?? 0);
+        });
+
+    final doc = pw.Document();
+    doc.addPage(
+      pw.MultiPage(
+        pageFormat: PdfPageFormat.a4,
+        build: (context) => [
+          pw.Text('Sweet Stop',
+              style: pw.TextStyle(fontSize: 20, fontWeight: pw.FontWeight.bold)),
+          pw.SizedBox(height: 8),
+          pw.Text('Order $code',
+              style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)),
+          pw.Text('Date: $dateStr'),
+          pw.Text('Customer: ${address?.full_name ?? ''}'),
+          pw.Text('Email: ${order.contactEmail ?? ''}'),
+          pw.Text('Ship to: ${shipTo.isEmpty ? '-' : shipTo}'),
+          pw.Text('Payment: ${order.paymentType ?? ''}'),
+          pw.Text('Shipping: ${order.shippingOption ?? ''}'),
+          pw.Text('Status: ${order.deliveryStatus ?? ''}'),
+          pw.SizedBox(height: 12),
+          pw.TableHelper.fromTextArray(
+            headers: const ['Description', 'Qty', 'Rate', 'Amount'],
+            data: rows.isEmpty ? [
+              ['No items stored', '', '', '']
+            ] : rows,
+            headerStyle: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold),
+            cellStyle: const pw.TextStyle(fontSize: 10),
+          ),
+          pw.SizedBox(height: 12),
+          pw.Align(
+            alignment: pw.Alignment.centerRight,
+            child: pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.end,
+              children: [
+                pw.Text('Subtotal: £${subtotal.toStringAsFixed(2)}'),
+                pw.Text('Shipping: £${(order.shippingCost ?? 0).toStringAsFixed(2)}'),
+                if (order.vatIncluded == true)
+                  pw.Text('VAT: £${(order.vatAmount ?? 0).toStringAsFixed(2)}'),
+                pw.Text('Total: £${(order.grandTotal ?? 0).toStringAsFixed(2)}',
+                    style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+    final bytes = await doc.save();
+    final safeCode = code.replaceAll(RegExp(r'[^a-zA-Z0-9_-]+'), '_');
+    await Printing.sharePdf(bytes: bytes, filename: 'invoice_$safeCode.pdf');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return TextButton.icon(
+      onPressed: _busy ? null : _download,
+      style: TextButton.styleFrom(
+        foregroundColor: sh_colorPrimary,
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        minimumSize: const Size(0, 32),
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      ),
+      icon: _busy
+          ? const SizedBox(
+              width: 14,
+              height: 14,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          : const Icon(Icons.download, size: 16),
+      label: Text('PDF',
+          style: GoogleFonts.workSans(fontSize: 12, fontWeight: FontWeight.w700)),
+    );
+  }
+}
+
 class _OrderCard extends StatelessWidget {
   final AmOrder item;
   const _OrderCard({Key? key, required this.item}) : super(key: key);
@@ -598,6 +741,8 @@ class _OrderCard extends StatelessWidget {
                         fontWeight: FontWeight.w500,
                         color: sh_textColorSecondary)),
                 const Spacer(),
+                _OrderPdfButton(order: item),
+                8.width,
                 Container(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 8),

@@ -18,6 +18,7 @@ class AmOrder {
   Timestamp? orderDate;
   Timestamp? deliveredDate;
   String? contactEmail;
+  String? invoiceUrl;
   String? customerType; // guest | customer | b2b
 
   AmOrder({
@@ -37,6 +38,7 @@ class AmOrder {
     this.orderDate,
     this.deliveredDate,
     this.contactEmail,
+    this.invoiceUrl,
     this.customerType,
   });
 
@@ -70,6 +72,7 @@ class AmOrder {
       deliveredDate:
           data['delivered_date'] is Timestamp ? data['delivered_date'] : null,
       contactEmail: (data['contact_email'] ?? '').toString(),
+      invoiceUrl: (data['invoice_url'] ?? '').toString(),
       customerType: (data['customer_type'] ?? '').toString(),
     );
   }

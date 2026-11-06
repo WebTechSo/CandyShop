@@ -619,6 +619,29 @@ class AmOrderSummaryScreenState extends State<AmOrderSummaryScreen> {
     return doc.save();
   }
 
+  bool _isEmailAddress(String value) {
+    return RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(value.trim());
+  }
+
+  Future<void> _queueOrderMail({
+    required List<String> to,
+    required String subject,
+    required String html,
+    required String text,
+    List<Map<String, String>>? attachments,
+  }) async {
+    await FirebaseFirestore.instance.collection('mail').add({
+      'to': to,
+      'message': {
+        'subject': subject,
+        'html': html,
+        'text': text,
+        if (attachments != null && attachments.isNotEmpty)
+          'attachments': attachments,
+      },
+    });
+  }
+
   Future<void> _sendOrderEmailWithInvoice({
     required String orderId,
     required String orderCode,
@@ -629,12 +652,15 @@ class AmOrderSummaryScreenState extends State<AmOrderSummaryScreen> {
     required String shippingMethod,
     required String paymentMethod,
     required AmAddressModel shippingAddress,
+    required String customerEmail,
+    required String customerName,
+    required bool includeVat,
   }) async {
     final authEmail = FirebaseAuth.instance.currentUser?.email?.trim() ?? '';
-    final contact = contactEmail.trim();
+    final contact = customerEmail.trim();
     final userRecipients = <String>{
-      if (authEmail.isNotEmpty) authEmail,
-      if (contact.isNotEmpty) contact,
+      if (_isEmailAddress(authEmail)) authEmail,
+      if (_isEmailAddress(contact)) contact,
     };
     if (userRecipients.isEmpty) return;
 
@@ -647,34 +673,48 @@ class AmOrderSummaryScreenState extends State<AmOrderSummaryScreen> {
       for (final d in adminSnap.docs) {
         final data = d.data();
         final e = (data['email'] ?? '').toString().trim();
-        if (e.isNotEmpty) adminRecipients.add(e);
+        if (_isEmailAddress(e) && !userRecipients.contains(e)) {
+          adminRecipients.add(e);
+        }
       }
     } catch (_) {}
 
-    final invoiceBytes = await _buildInvoicePdfBytes(
-      orderCode: orderCode,
-      orderDate: DateTime.now(),
-      shipping: shippingAddress,
-      products: orderProducts,
-      shippingMethod: shippingMethod,
-      shippingCost: orderShippingCost,
-      paymentMethod: paymentMethod,
-      grandTotal: orderTotalAmount,
-    );
+    Uint8List? invoiceBytes;
+    try {
+      invoiceBytes = await _buildInvoicePdfBytes(
+        orderCode: orderCode,
+        orderDate: DateTime.now(),
+        shipping: shippingAddress,
+        products: orderProducts,
+        shippingMethod: shippingMethod,
+        shippingCost: orderShippingCost,
+        paymentMethod: paymentMethod,
+        grandTotal: orderTotalAmount,
+      );
+    } catch (e) {
+      print('Invoice PDF failed: $e');
+    }
 
-    final path = 'invoices/$orderId.pdf';
-    final invoiceUrl = await StorageUpload.uploadBytes(
-      invoiceBytes,
-      path,
-      contentType: 'application/pdf',
-    );
-
-    await FirebaseFirestore.instance.collection('Orders').doc(orderId).set({
-      'invoice_url': invoiceUrl,
-      'invoice_path': path,
-      'vat_included': _includeVat,
-      'invoice_generated_at': FieldValue.serverTimestamp(),
-    }, SetOptions(merge: true));
+    var invoiceUrl = '';
+    if (invoiceBytes != null) {
+      final path = 'invoices/$orderId.pdf';
+      try {
+        invoiceUrl = await StorageUpload.uploadBytes(
+          invoiceBytes,
+          path,
+          contentType: 'application/pdf',
+        ).timeout(const Duration(seconds: 15));
+        await FirebaseFirestore.instance.collection('Orders').doc(orderId).set({
+          'invoice_url': invoiceUrl,
+          'invoice_path': path,
+          'vat_included': includeVat,
+          'invoice_generated_at': FieldValue.serverTimestamp(),
+        }, SetOptions(merge: true));
+      } catch (e) {
+        print('Invoice upload failed: $e');
+        invoiceUrl = '';
+      }
+    }
 
     String orderStatus = 'Pending';
     try {
@@ -689,7 +729,9 @@ class AmOrderSummaryScreenState extends State<AmOrderSummaryScreen> {
       }
     } catch (_) {}
 
-    final customerName = (shippingAddress.full_name ?? contactName).trim();
+    final greetingName = customerName.trim().isNotEmpty
+        ? customerName.trim()
+        : (shippingAddress.full_name ?? '').trim();
     final shipTo = <String>[
       (shippingAddress.address ?? '').trim(),
       (shippingAddress.city ?? '').trim(),
@@ -716,7 +758,7 @@ class AmOrderSummaryScreenState extends State<AmOrderSummaryScreen> {
       ''';
     }).join();
 
-    final vatRow = _includeVat
+    final vatRow = includeVat
         ? '''
           <tr>
             <td style="padding:2px 0;text-align:right;">VAT:</td>
@@ -727,24 +769,27 @@ class AmOrderSummaryScreenState extends State<AmOrderSummaryScreen> {
 
     final subtotal = (orderTotalAmount -
         orderShippingCost -
-        (_includeVat ? orderVatAmount : 0.0))
+        (includeVat ? orderVatAmount : 0.0))
         .clamp(0.0, double.infinity);
 
-    try {
-      // Create email document for Firebase "Trigger Email" Extension
-      await FirebaseFirestore.instance.collection('mail').add({
-        'to': userRecipients.toList(),
-        if (adminRecipients.isNotEmpty) 'bcc': adminRecipients.toList(),
-        'message': {
-          'subject': 'Sweet Stop - Order confirmation $orderCode',
-          'html': '''
+    final invoiceButton = invoiceUrl.isEmpty
+        ? ''
+        : '''
+                  <div style="margin-top:18px;text-align:right;">
+                    <a href="$invoiceUrl" style="display:inline-block;background:#0a6a3c;color:#ffffff;text-decoration:none;padding:10px 14px;border-radius:6px;font-size:14px;font-weight:700;">
+                      Download Invoice PDF
+                    </a>
+                  </div>
+        ''';
+    final subject = 'Sweet Stop - Order confirmation $orderCode';
+    final html = '''
             <div style="background:#f1f5f9;padding:24px 0;font-family:Arial,Helvetica,sans-serif;">
               <div style="max-width:720px;margin:0 auto;background:#ffffff;border:1px solid #e5e7eb;">
                 <div style="background:#0a6a3c;color:#ffffff;padding:18px 24px;text-align:center;font-size:22px;font-weight:700;">
                   Sweet Stop
                 </div>
                 <div style="padding:22px 24px;color:#111827;">
-                  <div style="font-size:16px;font-weight:700;">Hi ${customerName.isEmpty ? 'Customer' : customerName}</div>
+                  <div style="font-size:16px;font-weight:700;">Hi ${greetingName.isEmpty ? 'Customer' : greetingName}</div>
                   <div style="margin-top:10px;font-size:14px;color:#374151;">
                     Thank you for your order with us. Here is your order id <b>$orderCode</b>.
                   </div>
@@ -813,11 +858,7 @@ class AmOrderSummaryScreenState extends State<AmOrderSummaryScreen> {
                     </table>
                   </div>
 
-                  <div style="margin-top:18px;text-align:right;">
-                    <a href="$invoiceUrl" style="display:inline-block;background:#0a6a3c;color:#ffffff;text-decoration:none;padding:10px 14px;border-radius:6px;font-size:14px;font-weight:700;">
-                      Download Invoice PDF
-                    </a>
-                  </div>
+                  $invoiceButton
 
                   <div style="margin-top:18px;font-size:14px;color:#374151;text-align:center;">
                     Thank you for your business.
@@ -825,21 +866,57 @@ class AmOrderSummaryScreenState extends State<AmOrderSummaryScreen> {
                 </div>
               </div>
             </div>
-          ''',
-          'text':
-          'Sweet Stop\\n\\nHi ${customerName.isEmpty ? 'Customer' : customerName},\\n\\nThank you for your order. Order ID: $orderCode\\nStatus: $orderStatus\\nPayment: $paymentMethod\\nShipping: $shippingMethod\\nTotal: £${orderTotalAmount.toStringAsFixed(2)}\\nInvoice: $invoiceUrl',
-          'attachments': [
+    ''';
+    final text = 'Sweet Stop\n\nHi ${greetingName.isEmpty ? 'Customer' : greetingName},\n\n'
+        'Thank you for your order. Order ID: $orderCode\n'
+        'Status: $orderStatus\nPayment: $paymentMethod\n'
+        'Shipping: $shippingMethod\n'
+        'Total: £${orderTotalAmount.toStringAsFixed(2)}'
+        '${invoiceUrl.isEmpty ? '' : '\nInvoice: $invoiceUrl'}';
+    final attachments = invoiceBytes == null
+        ? null
+        : <Map<String, String>>[
             {
               'filename': 'invoice_$orderCode.pdf',
               'content': base64Encode(invoiceBytes),
               'encoding': 'base64',
               'contentType': 'application/pdf',
             }
-          ],
-        },
-      });
+          ];
+
+    try {
+      await _queueOrderMail(
+        to: userRecipients.toList(),
+        subject: subject,
+        html: html,
+        text: text,
+        attachments: attachments,
+      );
     } catch (e) {
-      print('SMTP send failed: $e');
+      print('Order email with invoice failed: $e');
+      try {
+        await _queueOrderMail(
+          to: userRecipients.toList(),
+          subject: subject,
+          html: html,
+          text: text,
+        );
+      } catch (retryError) {
+        print('Order email failed: $retryError');
+      }
+    }
+
+    if (adminRecipients.isNotEmpty) {
+      try {
+        await _queueOrderMail(
+          to: adminRecipients.toList(),
+          subject: subject,
+          html: html,
+          text: text,
+        );
+      } catch (e) {
+        print('Admin order email failed: $e');
+      }
     }
   }
 
@@ -908,25 +985,25 @@ class AmOrderSummaryScreenState extends State<AmOrderSummaryScreen> {
       );
 
       await CartService().clearCart();
+      try {
+        await _sendOrderEmailWithInvoice(
+          orderId: res.orderId,
+          orderCode: res.orderCode,
+          orderProducts: currentList,
+          orderTotalAmount: currentTotalAmount,
+          orderShippingCost: currentShippingCost,
+          orderVatAmount: currentVatAmount,
+          shippingMethod: currentShippingMethod,
+          paymentMethod: currentPaymentMethod,
+          shippingAddress: currentAddress,
+          customerEmail: contactEmail,
+          customerName: contactName,
+          includeVat: _includeVat,
+        ).timeout(const Duration(seconds: 40));
+      } catch (e) {
+        print('Order email/invoice failed: $e');
+      }
       if (mounted) Navigator.of(context, rootNavigator: true).maybePop();
-
-      unawaited(Future(() async {
-        try {
-          await _sendOrderEmailWithInvoice(
-            orderId: res.orderId,
-            orderCode: res.orderCode,
-            orderProducts: currentList,
-            orderTotalAmount: currentTotalAmount,
-            orderShippingCost: currentShippingCost,
-            orderVatAmount: currentVatAmount,
-            shippingMethod: currentShippingMethod,
-            paymentMethod: currentPaymentMethod,
-            shippingAddress: currentAddress,
-          );
-        } catch (e) {
-          print('Order email/invoice failed: $e');
-        }
-      }));
       if (!mounted) return;
       AmOrderSuccessScreen(orderNumber: res.orderCode,paymentMethod: currentPaymentMethod,)
           .launch(context, isNewTask: true);
